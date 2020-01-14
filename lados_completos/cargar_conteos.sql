@@ -7,8 +7,11 @@ AS $function$
 
 begin
 execute 'drop table if exists "' || localidad || '".conteos;';
+-- usa tabla global de conteos
 execute 'delete from segmentacion.conteos where tabla = ''' || localidad || ''';';
+
 execute '
+create table "' || localidad || '".conteos as
 WITH listado_sin_vacios AS (
     SELECT
     id, prov::integer, nom_provin, dpto::integer, nom_dpto, codaglo, codloc::integer,
@@ -63,17 +66,21 @@ WITH listado_sin_vacios AS (
     FROM lado_manzana
     LEFT JOIN listado_sin_vacios USING (prov,dpto,codloc,frac,radio,mza,lado)
     )
+select * from listado_carto;
+
 -- Conteo x lado de manzana
 insert INTO segmentacion.conteos (tabla, prov, depto, codloc, frac, radio, mza, lado, conteo)
+-- inserta en tabla global de conteos
 SELECT ''' || localidad || '''::text as tabla, prov, dpto depto, codloc,
     frac, radio, mza, lado,
     count(CASE
           WHEN trim(tipoviv) in ('''', ''CO'', ''N'', ''CA/'', ''LO'')
             THEN NULL
             ELSE tipoviv END) conteo
-from listado_carto
+from "' || localidad || '".conteos 
 GROUP BY prov, dpto, codloc, frac, radio, mza, lado, geom
 ORDER BY count(CASE WHEN trim(tipoviv)='''' THEN NULL ELSE tipoviv END) desc;'
+
 ;
 return 1;
 end;
