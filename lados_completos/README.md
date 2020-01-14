@@ -6,7 +6,7 @@ los segmentos contienen uno o más lados adyacentes de la misma manzana o de man
 ejemplo de ejecución:
 
 ```bash
-[halperin@arswebdev043 segmentador]$ python3 lados_completos.py e0359.arc 38 28 4 1 20 20 20 15
+[halperin@arswebdev043 lados_completos]$ python3 lados_completos.py e0359.arc 38 28 4 1 20 20 20 15
 ['e0359.arc', '38', '28', '4', '1', '20', '20', '20', '15']
 radio:
 38 28 4 1
@@ -40,8 +40,8 @@ costo 5087
 ['segmento', 25, 'carga', 17, 'costo', 51, 'componentes', [(34, 1), 33]]
 ['segmento', 26, 'carga', 4, 'costo', 4143, 'componentes', [36, 37, 38]]
 deseada: 20, máxima: 20, mínima: 20
-10.555717945098877 segundos
-[halperin@arswebdev043.indec.gob.ar]$ python /home/DCINDEC/halperin/segmentacion/segmentador/SegmentaManzanasLadosFracRadio.py e0359.arc 38 28 4 1 20 20 20 15
+10.330817699432373 segundos
+[halperin@arswebdev043.indec.gob.ar]$ python3 /home/DCINDEC/halperin/Segmentacion-CORE/lados_completos/lados_completos.py e0359.arc 38 28 4 1 20 20 20 15
 censo2020:segmentador:rodatnemges:172.26.67.239:5432
 ```
 
