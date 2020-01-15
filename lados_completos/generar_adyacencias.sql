@@ -148,11 +148,11 @@ select *, ''cruza''::text from lado_para_cruzar
 execute '
 delete
 from segmentacion.adyacencias
-where shape = ''' || localidad || '.arc''
+where shape = ''' || localidad || '''
 ;'
 ;
 
-/*
+
 execute '
 insert into segmentacion.adyacencias
 select ''' || localidad || '''::text as shape, substr(mza_i,1,2)::integer as prov,
@@ -166,7 +166,6 @@ select ''' || localidad || '''::text as shape, substr(mza_i,1,2)::integer as pro
 from "' || localidad || '".lados_adyacentes;
 ;'
 ;
-*/
 
 return 1;
 end;
