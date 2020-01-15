@@ -13,14 +13,14 @@ fecha: 2019-06-05 Mi
 
 ----
 -- estandariza caba al resto
-drop table caba.listado;
+drop table if exists caba.listado;
 create table caba.listado as
-select comunanumero as dpto, fraccionnumero as frac, radionumero as radio, manzananumero as mza, *
+select 
+comunanumero as dpto, fraccionnumero as frac, radionumero as radio, manzananumero as mza, *
 , '1'::text as codloc, ladonumero as lado, numerocatastral as nrocatastr, 
-row_number() OVER()  as orden_reco
+row_number() OVER(order by manzananumero::integer,ladonumero::integer,ordenrecorrido::integer,ordenrecorridoedificio::integer)  as orden_reco,
+row_number() OVER() as id
 from puerto_madero.listado
-order by
-manzananumero::integer,ladonumero::integer,ordenrecorrido::integer,ordenrecorridoedificio::integer
 ;
 ----
 /*
@@ -68,7 +68,7 @@ pisos_enteros as (
         nrocatastr, edificio, entrada, piso
     ),
 pisos_abiertos as (
-    select prov, dpto, codloc, frac, radio, mza, lado, nrocatastr, sector, edificio, entrada, piso,
+    select id, prov, dpto, codloc, frac, radio, mza, lado, nrocatastr, sector, edificio, entrada, piso,
         orden_reco, ini_piso,
         row_number() over w as row, rank() over w as rank
     from pisos_enteros
@@ -80,13 +80,30 @@ pisos_abiertos as (
         order by orden_reco, ini_piso
         -- rankea por ini_piso (como corresponde pares y pisos descendiendo)
         )
-    )
+    ),
 
-select prov, dpto, codloc, frac, radio, mza, lado, nrocatastr, sector, edificio, entrada, piso, orden_reco,
-    floor((rank - 1)*segs_x_mza/vivs) + 1 as sgm_mza, rank
-from deseado_manzana
-join pisos_abiertos
-using (prov, dpto, codloc, frac, radio, mza)
+segmento_id_en_mza as (
+    select id, prov, dpto, codloc, frac, radio, mza, lado, nrocatastr, sector, edificio, entrada, piso, orden_reco,
+        floor((rank - 1)*segs_x_mza/vivs) + 1 as sgm_mza, rank
+    from deseado_manzana
+    join pisos_abiertos
+    using (prov, dpto, codloc, frac, radio, mza)
+    ),
+
+segmentos_id as (
+    select row_number() over (order by dpto, frac, radio, mza, sgm_mza) as segmento_id,
+        dpto, frac, radio, mza, sgm_mza
+    from segmento_id_en_mza
+    group by dpto, frac, radio, mza, sgm_mza
+    )
+select id as listado_id, segmento_id
+--
+, prov, dpto, frac, radio, mza, lado
+--
+from segmentos_id
+join segmento_id_en_mza
+using (dpto, frac, radio, mza, sgm_mza)
+order by dpto, frac, radio, mza, lado, segmento_id
 ';
 return 1;
 end;
