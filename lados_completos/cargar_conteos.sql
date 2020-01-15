@@ -1,4 +1,5 @@
 ----------------------------------------
+drop FUNCTION indec.cargar_conteos(localidad text);
 CREATE OR REPLACE FUNCTION indec.cargar_conteos(localidad text)
  RETURNS integer
  LANGUAGE plpgsql volatile
@@ -65,31 +66,40 @@ WITH listado_sin_vacios AS (
     SELECT *
     FROM lado_manzana
     LEFT JOIN listado_sin_vacios USING (prov,dpto,codloc,frac,radio,mza,lado)
-    )
-select * from listado_carto;
-
--- Conteo x lado de manzana
-insert INTO segmentacion.conteos (tabla, prov, depto, codloc, frac, radio, mza, lado, conteo)
--- inserta en tabla global de conteos
-SELECT ''' || localidad || '''::text as tabla, prov, dpto depto, codloc,
-    frac, radio, mza, lado,
-    count(CASE
+    ),
+    conteos as (
+    SELECT ''' || localidad || '''::text as tabla, prov, dpto dpto, codloc,
+        frac, radio, mza, lado,
+        count(CASE
           WHEN trim(tipoviv) in ('''', ''CO'', ''N'', ''CA/'', ''LO'')
             THEN NULL
             ELSE tipoviv END) conteo
-from "' || localidad || '".conteos 
-GROUP BY prov, dpto, codloc, frac, radio, mza, lado, geom
-ORDER BY count(CASE WHEN trim(tipoviv)='''' THEN NULL ELSE tipoviv END) desc;'
+    from listado_carto
+    GROUP BY prov, dpto, codloc, frac, radio, mza, lado, geom
+    ORDER BY count(CASE WHEN trim(tipoviv)='''' THEN NULL ELSE tipoviv END) desc
+    )
+select * from conteos;
+';
 
+
+---- en tabla global 
+execute '
+delete 
+from segmentacion.conteos
+where tabla = ''' || localidad || '''
 ;
+
+insert INTO segmentacion.conteos (tabla, prov, dpto, codloc, frac, radio, mza, lado, conteo)
+-- inserta en tabla global de conteos
+SELECT ''' || localidad || '''::text as tabla, prov, dpto, codloc,
+    frac, radio, mza, lado, conteo
+from "' || localidad || '".conteos 
+';
+
 return 1;
 end;
 $function$
 ;
-
-select indec.cargar_conteos('0298');
-
-
 ----------------------------------------
 
 
