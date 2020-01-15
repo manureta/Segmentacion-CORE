@@ -61,15 +61,15 @@ deseado_manzana as (
     ),
 
 pisos_enteros as (
-    select prov, dpto, codloc, frac, radio, mza, lado, 
-        nrocatastr, edificio, entrada, piso, min(orden_reco) as ini_piso
+    select prov, dpto, codloc, frac, radio, mza, lado,
+        piso, min(orden_reco) as ini_piso
     from "' || localidad || '".listado
-    group by prov, dpto, codloc, frac, radio, mza, lado, 
+    group by prov, dpto, codloc, frac, radio, mza, lado,
         nrocatastr, edificio, entrada, piso
     ),
 pisos_abiertos as (
-    select prov, dpto, codloc, frac, radio, mza, lado, 
-        nrocatastr, edificio, entrada, piso, orden_reco, ini_piso,
+    select prov, dpto, codloc, frac, radio, mza, lado, nrocatastr, sector, edificio, entrada, piso,
+        orden_reco, ini_piso,
         row_number() over w as row, rank() over w as rank
     from pisos_enteros
     natural join "' || localidad || '".listado
@@ -77,21 +77,19 @@ pisos_abiertos as (
     window w as (
         partition by prov, dpto, codloc, frac, radio, mza
         -- separa las manzanas
-        order by prov, dpto, codloc, frac, radio, mza, lado, ini_piso
+        order by orden_reco, ini_piso
         -- rankea por ini_piso (como corresponde pares y pisos descendiendo)
         )
     )
-select prov, dpto, codloc, frac, radio, mza, lado, nrocatastr, edificio, entrada, piso, orden_reco,
+
+select prov, dpto, codloc, frac, radio, mza, lado, nrocatastr, sector, edificio, entrada, piso, orden_reco,
     floor((rank - 1)*segs_x_mza/vivs) + 1 as sgm_mza, rank
 from deseado_manzana
 join pisos_abiertos
 using (prov, dpto, codloc, frac, radio, mza)
-;
 ';
 return 1;
 end;
 $function$
 ;
-
-
 
