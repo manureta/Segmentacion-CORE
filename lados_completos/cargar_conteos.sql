@@ -1,5 +1,4 @@
 ----------------------------------------
-drop FUNCTION indec.cargar_conteos(localidad text);
 CREATE OR REPLACE FUNCTION indec.cargar_conteos(localidad text)
  RETURNS integer
  LANGUAGE plpgsql volatile
