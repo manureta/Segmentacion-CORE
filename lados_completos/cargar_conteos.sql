@@ -14,8 +14,8 @@ execute '
 create table "' || localidad || '".conteos as
 WITH listado_sin_vacios AS (
     SELECT
-    id, prov::integer, nom_provin, dpto::integer, nom_dpto, codaglo, codloc::integer,
-    nom_loc, codent, nom_ent, frac::integer, radio::integer, mza::integer, lado::integer,
+    id, prov::integer, dpto::integer, codaglo, codloc::integer,
+    codent, frac::integer, radio::integer, mza::integer, lado::integer,
     tipoviv
     FROM
     -------------------- listado --------------------------
