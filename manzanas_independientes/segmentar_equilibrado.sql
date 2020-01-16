@@ -25,44 +25,48 @@ execute 'drop table if exists "' || localidad || '".segmentacion;';
 execute '
 create table "' || localidad || '".segmentacion as
 with 
+listado as (
+    SELECT id, prov, dpto, codloc, frac, radio, mza, lado, nrocatastr,
+    COALESCE(sector,'''') sector, COALESCE(edificio,'''') edificio, COALESCE(entrada,'''') entrada,
+     piso, orden_reco
+    FROM "' || localidad || '".listado
+    ),
+
 casos as (
     select prov, dpto, codloc, frac, radio, mza,
            count(*) as vivs,
            ceil(count(*)/' || deseado || '::float) as max,
            greatest(1, floor(count(*)/' || deseado || '::float)) as min
-    from "' || localidad || '".listado
+    from caba.listado
     group by prov, dpto, codloc, frac, radio, mza
     ),
+
 deseado_manzana as (
     select prov, dpto, codloc, frac, radio, mza, vivs,
-        case when abs(vivs/max - ' || deseado || '::float) 
+        case when abs(vivs/max - ' || deseado || '::float)
             < abs(vivs/min - ' || deseado || '::float) then max
         else min end as segs_x_mza
     from casos
     ),
 
 pisos_enteros as (
-    select prov, dpto, codloc, frac, radio, mza, lado,
-        piso, min(orden_reco) as ini_piso
-    from "' || localidad || '".listado
+    select prov, dpto, codloc, frac, radio, mza, lado, nrocatastr, sector, edificio, entrada,
+        piso, min(orden_reco) as piso_id
+    from listado
     group by prov, dpto, codloc, frac, radio, mza, lado,
-        nrocatastr, edificio, entrada, piso
+        nrocatastr, sector, edificio, entrada, piso
     ),
 pisos_abiertos as (
     select id, prov, dpto, codloc, frac, radio, mza, lado, nrocatastr, sector, edificio, entrada, piso,
-        orden_reco, ini_piso,
+        orden_reco, piso_id,
         row_number() over w as row, rank() over w as rank
     from pisos_enteros
-    natural join "' || localidad || '".listado
---- se usan ventanas para calcular cortes
+     join listado using (prov, dpto, codloc, frac, radio, mza, lado, nrocatastr, sector, edificio, entrada, piso)
     window w as (
         partition by prov, dpto, codloc, frac, radio, mza
-        -- separa las manzanas
-        order by orden_reco, ini_piso
-        -- rankea por ini_piso (como corresponde pares y pisos descendiendo)
+        order by orden_reco
         )
     ),
-
 segmento_id_en_mza as (
     select id, prov, dpto, codloc, frac, radio, mza, lado, nrocatastr, sector, edificio, entrada, piso, orden_reco,
         floor((rank - 1)*segs_x_mza/vivs) + 1 as sgm_mza, rank
