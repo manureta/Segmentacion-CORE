@@ -11,25 +11,6 @@ fecha: 2019-06-05 Mi
 */
 
 
-----
--- estandariza caba al resto
-drop table if exists caba.listado;
-create table caba.listado as
-select 
-comunanumero as dpto, fraccionnumero as frac, radionumero as radio, manzananumero as mza, *
-, '1'::text as codloc, ladonumero as lado, numerocatastral as nrocatastr, 
-row_number() OVER(order by manzananumero::integer,ladonumero::integer,ordenrecorrido::integer,ordenrecorridoedificio::integer)  as orden_reco,
-row_number() OVER() as id
-from puerto_madero.listado
-;
-----
-/*
-select prov, dpto, codloc, frac, radio, mza, lado, nrocatastr, piso,
-orden_reco 
-from caba.listado
-order by orden_reco 
-;
-*/
 
 CREATE OR REPLACE FUNCTION indec.segmentar_equilibrado(localidad text, deseado integer)
  RETURNS integer
