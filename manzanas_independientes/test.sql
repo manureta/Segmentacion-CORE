@@ -24,10 +24,10 @@ order by orden_reco
 
 select indec.segmentar_equilibrado('caba',40);
 
-select mza, segmento_id, count(*) 
+select segmento_id, count(*) 
 from caba.segmentacion 
-group by mza, segmento_id
-order by mza, segmento_id
+group by segmento_id
+order by segmento_id
 ;
 
 select listado_id, segmento_id
