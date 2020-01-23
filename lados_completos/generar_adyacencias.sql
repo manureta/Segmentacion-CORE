@@ -18,6 +18,11 @@ create table "' || localidad || '".lados_adyacentes as
 
 with 
 
+cursos_de_agua as (
+    select array[99945, 99946, 99947, 99948, 99949,
+                 99970, 99971, 99972, 99973, 99974, 99975]::integer[]),
+ffcc as (
+    select array[99900, 99910, 99915, 99920, 99925, 99930]::integer[]),
 arcos as (select * from "' || localidad || '".arc),
 
 pedacitos_de_lado as (-- mza como PPDDDLLLFFRRMMM select mzad as mza, ladod as lado, avg(anchomed) as anchomed,
@@ -55,6 +60,8 @@ lados_de_manzana as (
     select row_number() over() as id, *,
         ST_StartPoint(wkb_geometry) as nodo_i_geom, ST_EndPoint(wkb_geometry) as nodo_j_geom
     from lados_orientados
+    where not codigos::integer[] && (select * from ffcc)
+    and not codigos::integer[] && (select * from cursos_de_agua)
     ),
 
 ---- que se puede hacer al llegar a la esquina
@@ -97,6 +104,9 @@ manzanas_adyacentes as (
     where substr(mzad,1,12) = substr(mzai,1,12) -- mismo PPDDDLLLFFRR
     and mzad is not Null and mzad != '''' and ladod != 0
     and mzai is not Null and mzai != '''' and ladod != 0
+--    and not array[''RUTA'']::text[] && tipos::text[] -- OJO: hay tipos en lados que son {''RUTA'',''AV''}
+--    y el array_agg se hace después de arcos
+    and tipo not ilike ''%RUTA%''
     ),
 
 ---- "volver" en realidad es que está en frente -------------------
