@@ -127,3 +127,11 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# dbf y sql files
+*.dbf
+*.sql
+
+# vi swaps
+.*.sw*
+
