@@ -18,11 +18,6 @@ create table "' || localidad || '".lados_adyacentes as
 
 with 
 
-cursos_de_agua as (
-    select array[99945, 99946, 99947, 99948, 99949,
-                 99970, 99971, 99972, 99973, 99974, 99975]::integer[] as agua),
-ffcc as (
-    select array[99900, 99910, 99915, 99920, 99925, 99930]::integer[] as hierro),
 arcos as (select * from "' || localidad || '".arc),
 
 pedacitos_de_lado as (-- mza como PPDDDLLLFFRRMMM select mzad as mza, ladod as lado, avg(anchomed) as anchomed,
@@ -61,11 +56,6 @@ lados_de_manzana as (
         ST_StartPoint(wkb_geometry) as nodo_i_geom, ST_EndPoint(wkb_geometry) as nodo_j_geom
     from lados_orientados
 
----- no eliminarlos
---    where not codigos::integer[] && (select * from ffcc)
---    and not codigos::integer[] && (select * from cursos_de_agua)
----- están como lado, sólo que no se pueden cruzar
-
     ),
 
 ---- que se puede hacer al llegar a la esquina
@@ -87,7 +77,8 @@ doblando as (
     ),
 lado_para_doblar as (
     select ppdddlllffrrmmm as mza_i, de_lado as lado_i,
-        ppdddlllffrrmmm as mza_j, a.lado as lado_j
+        ppdddlllffrrmmm as mza_j, a.lado as lado_j,
+        Null::text as arc_tipo, Null::integer as arc_codigo
     from doblando d
     join lados_de_manzana a
     using(ppdddlllffrrmmm, lado)
@@ -97,25 +88,18 @@ lado_para_doblar as (
 --  para calcular los lados de cruzar y volver
 
 manzanas_adyacentes as (
-    select mzad as mza_i, mzai as mza_j
-    from arcos, cursos_de_agua, ffcc
+    select mzad as mza_i, mzai as mza_j, tipo as arc_tipo, codigo20 as arc_codigo
+    -- agrega tipo y codigo para calcular costo de pasar a mza adyacente
+    from arcos
     where substr(mzad,1,12) = substr(mzai,1,12) -- mismo PPDDDLLLFFRR
         and mzad is not Null and mzad != '''' and ladod != 0
         and mzai is not Null and mzai != '''' and ladod != 0
     union -- hacer simétrica
-    select mzai, mzad
-    from arcos, cursos_de_agua, ffcc
+    select mzai as mza_i, mzad as mza_j, tipo as arc_tipo, codigo20 as arc_codigo
+    from arcos
     where substr(mzad,1,12) = substr(mzai,1,12) -- mismo PPDDDLLLFFRR
     and mzad is not Null and mzad != '''' and ladod != 0
     and mzai is not Null and mzai != '''' and ladod != 0
-
----- usa sólo info de arcos
-    and tipo not ilike ''%RUTA%''
-    and not codigo20 in (select * from unnest(hierro))
-    and not codigo20 in (select * from unnest(agua))
----- sin el agregado a array de tipos hecho en pedacitos_de_lado
----- ya que hace a los lados de manzana 
----- y no a los arcos que marcan la separación de mzas
 
     ),
 
@@ -126,7 +110,8 @@ manzanas_adyacentes as (
 
 lado_de_enfrente as (
     select i.ppdddlllffrrmmm as mza_i, i.lado as lado_i,
-        j.ppdddlllffrrmmm as mza_j, j.lado as lado_j
+        j.ppdddlllffrrmmm as mza_j, j.lado as lado_j,
+        a.arc_tipo, a.arc_codigo
     from lados_de_manzana i
     join lados_de_manzana j
     on i.nodo_j_geom = j.nodo_i_geom -- el lado_i termina donde el lado_j empieza
@@ -143,7 +128,8 @@ lado_de_enfrente as (
 
 lado_para_cruzar as (
     select i.ppdddlllffrrmmm as mza_i, i.lado as lado_i,
-        j.ppdddlllffrrmmm as mza_j, j.lado as lado_j
+        j.ppdddlllffrrmmm as mza_j, j.lado as lado_j,
+        a.arc_tipo, a.arc_codigo
     from lados_de_manzana i
     join lados_de_manzana j
     on i.nodo_j_geom = j.nodo_i_geom
