@@ -126,6 +126,23 @@ CREATE TABLE segmentacion.conteos (
     id serial
 );
 
+--- crea la tabla global to be deprecated
+CREATE TABLE segmentacion.adyacencias (
+    shape text,
+    prov integer,
+    dpto integer,
+    codloc integer,
+    frac integer,
+    radio integer,
+    mza integer,
+    lado integer,
+    mza_ady integer,
+    lado_ady integer,
+    tipo text
+);
+--- (!) ordenar esto: poner en otro archivo 
+--- o juntar todo en un solo archivo .sql
+
 
 
 
