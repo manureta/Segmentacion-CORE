@@ -94,13 +94,14 @@ manzanas_adyacentes as (
     where substr(mzad,1,12) = substr(mzai,1,12) -- mismo PPDDDLLLFFRR
         and mzad is not Null and mzad != '''' and ladod != 0
         and mzai is not Null and mzai != '''' and ladod != 0
+        and mzai != mzad
     union -- hacer simétrica
     select mzai as mza_i, mzad as mza_j, tipo as arc_tipo, codigo20 as arc_codigo
     from arcos
     where substr(mzad,1,12) = substr(mzai,1,12) -- mismo PPDDDLLLFFRR
-    and mzad is not Null and mzad != '''' and ladod != 0
-    and mzai is not Null and mzai != '''' and ladod != 0
-
+        and mzad is not Null and mzad != '''' and ladod != 0
+        and mzai is not Null and mzai != '''' and ladod != 0
+        and mzad != mzai
     ),
 
 ---- "volver" en realidad es que está en frente -------------------

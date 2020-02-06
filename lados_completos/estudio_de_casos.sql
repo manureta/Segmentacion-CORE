@@ -217,5 +217,14 @@ from segmentacion.conteos
 ;
 
 
+---- ver como se puede hacer indec.costo_adyacencia(m_i, l_i, m_j, l_j)
+
+select * 
+from e0359.lados_adyacentes
+--where mza_i = mza_j
+;
+
+
+
 
 

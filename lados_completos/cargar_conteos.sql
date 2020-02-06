@@ -110,4 +110,22 @@ $function$
 ;
 ----------------------------------------
 
+--- to be deprecated
+-- crea tabla segmentacion.conteos
+create schema segmentacion;
+CREATE TABLE segmentacion.conteos (
+    tabla text,
+    prov integer,
+    dpto integer,
+    codloc integer,
+    frac integer,
+    radio integer,
+    mza integer,
+    lado integer,
+    conteo bigint,
+    id serial
+);
+
+
+
 

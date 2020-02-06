@@ -128,9 +128,9 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# dbf y sql files
+# dbf files y data
 *.dbf
-*.sql
+data/
 
 # vi swaps
 .*.sw*
