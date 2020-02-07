@@ -5,7 +5,7 @@ function de CORE
 Mi 6-2-2020
 */
 
-CREATE OR REPLACE FUNCTION indec.costo_adyacencias(arc_tipo text, arc_codigo integer)
+CREATE OR REPLACE FUNCTION indec.costo_adyacencia(arc_tipo text, arc_codigo integer)
  RETURNS integer
  LANGUAGE sql IMMUTABLE
 SET client_min_messages = error
