@@ -230,7 +230,8 @@ import time
 #_prov = 54
 #_dpto = 105 # ahora vienen en arg
 
-conexion = ["censo2020", "segmentador", "rodatnemges", "172.26.67.239", "5432"]
+#conexion = ["censo2020", "segmentador", "rodatnemges", "172.26.67.239", "5432"]
+conexion = ["CPHyV2020", "halpe", "halpe", "172.26.68.174", "5432"]
 conn = psycopg2.connect(
             database = conexion[0],
             user = conexion[1],
