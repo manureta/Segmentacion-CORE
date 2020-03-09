@@ -142,11 +142,11 @@ lado_para_cruzar as (
     where ST_Dimension(ST_Intersection(i.wkb_geometry,j.wkb_geometry)) = 0
     )
 
-select *, ''dobla''::text as tipo from lado_para_doblar
+select mza_i, lado_i::integer, mza_j, lado_j::integer, arc_tipo, arc_codigo, ''dobla''::text as tipo from lado_para_doblar
 union
-select *, ''enfrente''::text from lado_de_enfrente
+select mza_i, lado_i::integer, mza_j, lado_j::integer, arc_tipo, arc_codigo, ''enfrente''::text from lado_de_enfrente
 union
-select *, ''cruza''::text from lado_para_cruzar
+select mza_i, lado_i::integer, mza_j, lado_j::integer, arc_tipo, arc_codigo, ''cruza''::text from lado_para_cruzar
 ;'
 ;
 
