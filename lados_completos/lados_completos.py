@@ -94,7 +94,7 @@ def cuantas_manzanas(estos):
 cantidad_de_viviendas_deseada_por_segmento = 20
 cantidad_de_viviendas_maxima_deseada_por_segmento = 23
 cantidad_de_viviendas_minima_deseada_por_segmento = 17
-cantidad_de_viviendas_permitida_para_romper_manazna = 5
+cantidad_de_viviendas_permitida_para_romper_manzana = 5
 multa_fuera_rango_superior = 1
 multa_fuera_rango_inferior = 1
 
