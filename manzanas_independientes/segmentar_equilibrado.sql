@@ -68,7 +68,7 @@ pisos_abiertos as (
     natural join listado_sin_nulos
     window w as (
         partition by prov, dpto, codloc, frac, radio, mza
-        order by lado, orden_reco
+        order by orden_reco
         )
     ),
 
