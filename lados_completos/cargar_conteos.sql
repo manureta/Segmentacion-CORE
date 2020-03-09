@@ -110,4 +110,39 @@ $function$
 ;
 ----------------------------------------
 
+--- to be deprecated
+-- crea tabla segmentacion.conteos
+create schema segmentacion;
+CREATE TABLE segmentacion.conteos (
+    tabla text,
+    prov integer,
+    dpto integer,
+    codloc integer,
+    frac integer,
+    radio integer,
+    mza integer,
+    lado integer,
+    conteo bigint,
+    id serial
+);
+
+--- crea la tabla global to be deprecated
+CREATE TABLE segmentacion.adyacencias (
+    shape text,
+    prov integer,
+    dpto integer,
+    codloc integer,
+    frac integer,
+    radio integer,
+    mza integer,
+    lado integer,
+    mza_ady integer,
+    lado_ady integer,
+    tipo text
+);
+--- (!) ordenar esto: poner en otro archivo 
+--- o juntar todo en un solo archivo .sql
+
+
+
 
