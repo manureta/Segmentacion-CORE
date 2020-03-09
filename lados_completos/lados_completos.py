@@ -230,7 +230,8 @@ import time
 #_prov = 54
 #_dpto = 105 # ahora vienen en arg
 
-conexion = ["censo2020", "segmentador", "rodatnemges", "172.26.67.239", "5432"]
+#conexion = ["censo2020", "segmentador", "rodatnemges", "172.26.67.239", "5432"]
+conexion = ["CPHyV2020", "halpe", "halpe", "172.26.68.174", "5432"] # arsdbprd
 conn = psycopg2.connect(
             database = conexion[0],
             user = conexion[1],
@@ -456,14 +457,14 @@ for prov, dpto, frac, radio in radios:
             if componentes_no_en_adyacencias:
                 print ("Cuidado: ")
                 print
-                print ("no están en adyacencias, cobertura con errores, quizás?", componentes_no_en_adyacencias)
-                print ("no se les asignó componentes adyacentes y quedaron aisladas")
+                print ("no estan en adyacencias, cobertura con errores, quizas?", componentes_no_en_adyacencias)
+                print ("no se les asigno componentes adyacentes y quedaron aisladas")
                 print
 
             # muestra solución
             mejor_solucion.sort(key = seg_id)
             print ("---------")
-            print ("mínimo local")
+            print ("minimo local")
             print ("costo", costo_minimo)
             for s, segmento in enumerate(mejor_solucion):
                 print (["segmento", s+1, 
@@ -471,7 +472,7 @@ for prov, dpto, frac, radio in radios:
                    "costo", costo(segmento), 
                    "componentes", segmento])
 
-            print ("deseada: %d, máxima: %d, mínima: %d" % (cantidad_de_viviendas_deseada_por_segmento,
+            print ("deseada: %d, maxima: %d, minima: %d" % (cantidad_de_viviendas_deseada_por_segmento,
                 cantidad_de_viviendas_maxima_deseada_por_segmento, 
                 cantidad_de_viviendas_minima_deseada_por_segmento))
 
