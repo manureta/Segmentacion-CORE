@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 import sys
+sys.path.append('.')
 from decimal import *
 print (sys.argv[1:])
 _table = sys.argv[1]
+parametro1 = _table.split('.')
+_table = parametro1[0]
 _prov = int(sys.argv[2])
 _dpto = int(sys.argv[3])
 _frac = int(sys.argv[4])
@@ -84,6 +87,22 @@ def cuantas_manzanas(estos):
     mzas.extend([cmpt for cmpt in estos if type(cmpt) is int])
     return len(set(mzas))
 
+def adyacencias_componentes(estos):
+    #return [este for este in estos]
+    return [(este, ese) for este in estos for ese in estos if (este, ese) in adyacencias]
+
+def costo_adyacencia(esta):
+    (este, ese) = esta
+    if type(este) is int:
+        este = (este, 0)
+    if type(ese) is int:
+        ese = (ese, 0)
+    costos = [c_a[2] for c_a in costos_adyacencias if (c_a[0], c_a[1]) == (este, ese)]
+    if costos:
+        return costos[0]
+    
+    
+
 
 #################################################################################
 #
@@ -111,6 +130,8 @@ def costo(segmento):
     # segmento es una lista de manzanas
     carga_segmento = carga(segmento)
     mzas_segmento = cuantas_manzanas(segmento)
+    adyacencias_segmento = adyacencias_componentes(segmento)
+    costo_adyacencias = sum(costo_adyacencia(ady) for ady in adyacencias_segmento if costo_adyacencia(ady))
     if carga_segmento > cantidad_de_viviendas_maxima_deseada_por_segmento:
         # la carga es mayor el costo es el cubo
         costo = (abs(carga_segmento - cantidad_de_viviendas_maxima_deseada_por_segmento) 
@@ -128,7 +149,7 @@ def costo(segmento):
     else:  # está entre los valores deseados
         # el costo el la diferencia absoluta al valor esperado
         costo = abs(carga_segmento - cantidad_de_viviendas_deseada_por_segmento)
-    return costo + 10*mzas_segmento
+    return costo + 5*mzas_segmento + 100*costo_adyacencias
 
     """
     # otro caso, costo en rango, cuadrático por arriba y lineal por abajo
@@ -155,7 +176,14 @@ def seg_id(segmento):
         return (min_mza, 0)
     else: 
         return (min_m, min_l)
-    
+
+def cmpt_id(cmpt):
+    if type(cmpt) is tuple:
+        return cmpt
+    else:
+        return (cmpt, 0)
+ 
+        
     
 
 #####################################################################################
@@ -176,6 +204,26 @@ def costo_segmentacion(segmentacion):
 
 # definicón del vecindario de una segmentacíon para definir y recorrer la red de segementaciones
 # vecindario devuelve array de vecinos usando extraer y transferir 
+
+def vecinos(segmento, segmentacion):
+    sgm = list(segmento)
+    vecinos = []
+    # extracciones
+    for este in sgm:
+        sgm2 = list(segmento)
+        vecinos.append(este)
+        vecinos.extend(extraer(este, sgm2))
+    # transferencias
+    for este in sgm:
+        for otro in segmentacion:
+            for ese in otro:
+                if (este, ese) in adyacencias:
+                    otr = list(otro)
+                    # vecinos.extend(extraer(este, list(segmento)))
+                    # ya agregado en extracciones
+                    vecinos.append(otr.append(este))
+    return vecinos    
+
 def vecindario(segmentacion):
     # devuelve array de vecinos
     vecindario = []
@@ -206,14 +254,16 @@ def vecindario(segmentacion):
                         transferencia = transferir(cada, este, ese)
                         if transferencia: # se pudo hacer 
                             vecino = transferencia + aquella
+                    #        print ('transferí', cada, este, ese)
                             vecindario.append(vecino)
                 # fusión de 2 segmentos evitando repeticiones 
                 #(cuando alguno es una solo elemento la fusion es considerada en la transferencia)
                 if len(este) > 1 and len(ese) > 1 and conectados(este + ese):
                     vecino = [este + ese] + aquella
+                    #print ('transferí', cada, este, ese)
                     vecindario.append(vecino) # analizar fusiones
     return vecindario
-# no devuelve repeticiones
+# devuelve repeticiones
 
 #
 # optimización
@@ -226,133 +276,45 @@ import psycopg2
 import operator
 import time
 
-#_table = '0339'  # San Javier
-#_prov = 54
-#_dpto = 105 # ahora vienen en arg
+import DAO
 
-conexion = ["censo2020", "segmentador", "rodatnemges", "172.26.67.239", "5432"]
-conn = psycopg2.connect(
-            database = conexion[0],
-            user = conexion[1],
-            password = conexion[2],
-            host = conexion[3],
-            port = conexion[4])
+dao = DAO.DAO()
+#dao.db('segmentador:rodatnemges:censo2020:172.26.67.239')
+dao.db('halpe:halpe:CPHyV2020:172.26.68.174')
 
-# obtener prov, dpto, frac que estan en segmentacion.conteos
-cur = conn.cursor()
-sql = ("select distinct prov::integer, dpto::integer, frac::integer, radio::integer"
-       " from segmentacion.conteos"
-       " order by prov::integer, dpto::integer, frac::integer, radio::integer;")
-cur.execute(sql)
-radios = cur.fetchall()
-#print (_prov, _dpto)
-#print (radios)
-
-def sql_where_pdfr(prov, dpto, frac, radio):
-    return ("\nwhere prov::integer = " + str(prov)
-            + "\n and dpto::integer = " + str(dpto)
-            + "\n and frac::integer = " + str(frac)
-            + "\n and radio::integer = " + str(radio))
-
-def sql_where_PPDDDLLLMMM(prov, dpto, frac, radio, cpte, side):
-    if type(cpte) is int:
-        mza = cpte
-    elif type(cpte) is tuple:
-        (mza, lado) = cpte
-    where_mza = ("\nwhere substr(mza" + side + ",1,2)::integer = " + str(prov)
-            + "\n and substr(mza" + side + ",3,3)::integer = " + str(dpto)
-            + "\n and substr(mza" + side + ",9,2)::integer = " + str(frac)
-            + "\n and substr(mza" + side + ",11,2)::integer = " + str(radio)
-            + "\n and substr(mza" + side + ",13,3)::integer = " + str(mza)
-            )
-    if type(cpte) is tuple:
-            where_mza = (where_mza 
-                + "\n and lado" + side + "::integer = " + str(lado))
-    return where_mza
+radios = dao.get_radios(_table)
 
 for prov, dpto, frac, radio in radios:
-#  if (radio and not(prov == 38 and dpto == 28 and radio == 1)): # (sacar radio 1 que es un lio)
     if (radio and prov == _prov and dpto == _dpto and frac == _frac and radio == _radio): # las del _table
         print
         print ("radio: ")
         print (prov, dpto, frac, radio)
-        cur = conn.cursor()
-        sql = ("select mza, sum(conteo)::int from segmentacion.conteos"
-            + sql_where_pdfr(prov, dpto, frac, radio)
-            + "\ngroup by mza;")
-        cur.execute(sql)
-        conteos_mzas = cur.fetchall()
+        conteos_mzas = dao.get_conteos_mzas(_table, prov, dpto, frac, radio)
         manzanas = [mza for mza, conteo in conteos_mzas]
 
-#        print >> sys.stderr, "conteos_mzas"
-#        print >> sys.stderr, conteos_mzas
+        conteos = dao.get_conteos_lados(_table, prov, dpto, frac, radio)
+        conteos_lados = [((mza, lado), conteo) for mza, lado, conteo in conteos]
+        lados = [(mza, lado) for mza, lado, conteo in conteos]
 
-        sql = ("select mza, lado, sum(conteo)::int from segmentacion.conteos"
-            + sql_where_pdfr(prov, dpto, frac, radio)
-            + "\ngroup by mza, lado;")
-        cur.execute(sql)
-        result = cur.fetchall()
-        conteos_lados = [((mza, lado), conteo) for mza, lado, conteo in result]
-        lados = [(mza, lado) for mza, lado, conteo in result]
+        costos_adyacencias = [((mza, lado), (mza_ady, lado_ady), costo) for mza, lado, mza_ady, lado_ady, costo 
+            in dao.get_costos_adyacencias(_table, prov, dpto, frac, radio)]
+        #print (costos_adyacencias)
 
-#        print >> sys.stderr, "conteos_lados"
-#        print >> sys.stderr, conteos_lados
+        adyacencias_mzas_mzas = dao.get_adyacencias_mzas_mzas(_table, prov, dpto, frac, radio)
 
+        adyacencias_mzas_lados = [(mza, (mza_ady, lado_ady)) for mza, mza_ady, lado_ady 
+            in dao.get_adyacencias_mzas_lados(_table, prov, dpto, frac, radio)]
+    
+        adyacencias_lados_mzas= [((mza, lado), mza_ady) for mza, lado, mza_ady 
+            in dao.get_adyacencias_lados_mzas(_table, prov, dpto, frac, radio)]
 
-        sql = ("select mza, max(lado) from segmentacion.conteos"
-            + sql_where_pdfr(prov, dpto, frac, radio)
-            + "\ngroup by mza;")
-        cur.execute(sql)
-        mza_ultimo_lado = cur.fetchall()
+        lados_enfrentados = [((mza, lado), (mza_ady, lado_ady)) for mza, lado, mza_ady, lado_ady 
+            in dao.get_adyacencias_lados_enfrentados(_table, prov, dpto, frac, radio)]
+#        print ('lados_enfrentados', lados_enfrentados)
 
-
-        # eliminar rutas o av
-        excluir = " " #" and not (tipo like 'RUTA%' or tipo like 'CURSO DE AGUA%' or tipo like 'LINEA FERREA%')"
-
-        sql = ("select mza, mza_ady from segmentacion.adyacencias"
-            + sql_where_pdfr(prov, dpto, frac, radio)
-            + "\n and mza != mza_ady" + excluir
-            + "\ngroup by mza, mza_ady;")
-#        print(sql)
-        cur.execute(sql)
-        adyacencias_mzas_mzas = cur.fetchall()
-
-        sql = ("select mza, mza_ady, lado_ady from segmentacion.adyacencias"
-            + sql_where_pdfr(prov, dpto, frac, radio)
-            + "\n and mza != mza_ady" + excluir
-            + ";")
-        cur.execute(sql)
-        result = cur.fetchall()
-        adyacencias_mzas_lados = [(mza, (mza_ady, lado_ady)) for mza, mza_ady, lado_ady in result]
-
-        sql = ("select mza, lado, mza_ady from segmentacion.adyacencias"
-            + sql_where_pdfr(prov, dpto, frac, radio)
-            + "\n and mza != mza_ady" + excluir
-            + ";")
-        cur.execute(sql)
-        result = cur.fetchall()
-        adyacencias_lados_mzas= [((mza, lado), mza_ady) for mza, lado, mza_ady in result]
-
-        sql = ("select mza, lado, mza_ady, lado_ady from segmentacion.adyacencias"
-            + sql_where_pdfr(prov, dpto, frac, radio)
-            + "\n and mza != mza_ady" + excluir
-            + ";")
-        cur.execute(sql)
-        result = cur.fetchall()
-        lados_enfrentados = [((mza, lado), (mza_ady, lado_ady)) for mza, lado, mza_ady, lado_ady in result]
-
-        lados_contiguos = []
-        for mza, lado in lados:
-            ultimo_lado = next(ultimo for mza, ultimo in mza_ultimo_lado)
-            if lado == 1:
-                lados_contiguos.append(((mza, lado),(mza, ultimo_lado)))
-                lados_contiguos.append(((mza, lado),(mza, lado + 1)))
-            elif lado == ultimo_lado:
-                lados_contiguos.append(((mza, lado),(mza, lado - 1)))
-                lados_contiguos.append(((mza, lado),(mza, 1)))
-            else:
-                lados_contiguos.append(((mza, lado),(mza, lado - 1)))
-                lados_contiguos.append(((mza, lado),(mza, lado + 1)))
+        lados_contiguos = [((mza, lado), (mza_ady, lado_ady)) for mza, lado, mza_ady, lado_ady
+            in dao.get_adyacencias_lados_contiguos(_table, prov, dpto, frac, radio)]
+#       print ('lados_contiguos', lados_contiguos)
 
         conteos = conteos_mzas
         adyacencias = adyacencias_mzas_mzas
@@ -361,6 +323,13 @@ for prov, dpto, frac, radio in radios:
         conteos_excedidos = [(manzana, conteo) for (manzana, conteo) in conteos_mzas
                             if conteo > cantidad_de_viviendas_permitida_para_romper_manzana]
         mzas_excedidas = [mza for mza, conteo in conteos_excedidos]
+        
+        lados_excedidos = [(mza, lado) for ((mza, lado), conteo) in conteos_lados
+                            if conteo > cantidad_de_viviendas_permitida_para_romper_manzana]
+
+        print ('manzanas a partir:', mzas_excedidas)
+        print ('lados excedidas:', lados_excedidos)
+
 
         componentes = [mza for mza in manzanas if mza not in mzas_excedidas]
         conteos = [(mza, conteo) for (mza, conteo) in conteos if mza not in mzas_excedidas]
@@ -382,9 +351,23 @@ for prov, dpto, frac, radio in radios:
         adyacencias.extend([((mza, lado), (mza_ady, lado_ady))
                         for (mza, lado), (mza_ady, lado_ady) in lados_contiguos])
         # se agregan los lados correspondientes a esas manzanas
-
+        #print ((adyacencias))
         #print >> sys.stderr, "componentes"
         #print >> sys.stderr, componentes
+#
+#        adyacencias.extend((ese, este) for (este, ese) in adyacencias)
+#        adyacencias = list(set(adyacencias))
+
+#        print (adyacencias)
+        adyacencias = [(este, ese) for (este, ese) in adyacencias if este not in lados_excedidos and ese not in lados_excedidos]
+#        print (adyacencias)
+#        print (lados_excedidos)
+#        print (componentes)
+        componentes = list(set(componentes) - set(lados_excedidos))
+#        print (componentes)
+
+
+        # elimina lado con más de cant deseada para aplicarles el otro algoritmo
 
 #---- hasta acá
 
@@ -410,6 +393,7 @@ for prov, dpto, frac, radio in radios:
                 adyacentes[cpte] = list([])
             for cpte, adyacente in adyacencias:
                 adyacentes[cpte] = adyacentes[cpte] + [adyacente]
+                adyacentes[adyacente] = adyacentes[adyacente] + [cpte]
 #            for manzana in sorted(adyacentes.iterkeys()):
 #                print (manzana, adyacentes[manzana])
 
@@ -443,7 +427,7 @@ for prov, dpto, frac, radio in radios:
                   while min(costos_vecinos) < costo_actual: # se puede mejorar 
                       min_id, mejor_costo = min(enumerate(costos_vecinos), key=operator.itemgetter(1))
                       solucion = vecinos[min_id] # greedy
-  #                    print >> sys.stderr, mejor_costo
+                      # print (mejor_costo)
                       vecinos = list(vecindario(solucion))
                       costo_actual = mejor_costo 
                       # costos_vecinos = map(costo_segmentacion, vecinos)
@@ -466,10 +450,16 @@ for prov, dpto, frac, radio in radios:
             print ("mínimo local")
             print ("costo", costo_minimo)
             for s, segmento in enumerate(mejor_solucion):
+                segmento.sort(key = cmpt_id)
                 print (["segmento", s+1, 
                    "carga", carga(segmento), 
                    "costo", costo(segmento), 
-                   "componentes", segmento])
+                   "componentes", segmento,
+                    "cuantas_manzanas", cuantas_manzanas(segmento)
+#                   "adyacencias", adyacencias_componentes(segmento),
+#                   "costo_adyacencias", sum([costo_adyacencia(ady) for ady in adyacencias_componentes(segmento) if costo_adyacencia(ady)])
+                    ])
+#            print ((vecindario(mejor_solucion)))
 
             print ("deseada: %d, máxima: %d, mínima: %d" % (cantidad_de_viviendas_deseada_por_segmento,
                 cantidad_de_viviendas_maxima_deseada_por_segmento, 
@@ -492,21 +482,7 @@ for prov, dpto, frac, radio in radios:
 # update _table = shapes.eAAAAa  (usando lados)
 #------
             for cpte in componentes:
-                sql = ("update " + _table   
-                    + " set segi = " + str(segmentos[cpte])
-                    + sql_where_PPDDDLLLMMM(prov, dpto, frac, radio, cpte, 'i')
-                    + " AND mzai is not null AND mzai != ''"
-                    + "\n;")
-                #print ("", sql)
-                cur.execute(sql)
-                sql = ("update " + _table   
-                    + " set segd = " + str(segmentos[cpte])
-                    + sql_where_PPDDDLLLMMM(prov, dpto, frac, radio, cpte, 'd')
-                    + " AND mzad is not null AND mzad != ''"
-                    + "\n;")
-                #print (" ", sql)
-                cur.execute(sql)
-            conn.commit()
+               dao.set_componente_segmento(_table, prov, dpto, frac, radio, cpte, segmentos[cpte])
 #            raw_input("Press Enter to continue...")
         else:
             print ("sin adyacencias")
@@ -523,26 +499,9 @@ import getpass
 user = getpass.getuser()
 user_host = user + '@' + host
 comando = " ".join(sys.argv[:])
-print('[' + user_host + ']$ python3 ' + pwd + '/' + comando)
-print(":".join(conexion))
+print('[' + user_host + ']$ python ' + pwd + '/' + comando)
+print(":".join(dao.conn_info))
+import datetime
 
-sql = ("delete from corrida "
-     + sql_where_pdfr(_prov, _dpto, _frac, _radio)
-     + "\n;")
-#print ("", sql)
-cur.execute(sql)
+dao.set_corrida(comando, user_host, pwd, prov, dpto, frac, radio, datetime.datetime.now())
 
-sql = ("insert into corrida (comando, user_host, pwd, conexion, prov, dpto, frac, radio) values"
-     + " ('" + str(comando) 
-     + "', '" + str(user_host)
-     + "', '" + str(pwd)
-     + "', '" + str(":".join(conexion))
-     + "', " + str(_prov)
-     + " , " + str(_dpto)
-     + " , " + str(_frac)
-     + " , " + str(_radio)
-     + ")\n;")
-#print ("", sql)
-cur.execute(sql)
-conn.commit()
-conn.close()
