@@ -76,7 +76,7 @@ doblando as (
     where lado != 0
     ),
 lado_para_doblar as (
-    select ppdddlllffrrmmm as mza_i, de_lado as lado_i,
+    select distinct ppdddlllffrrmmm as mza_i, de_lado as lado_i,
         ppdddlllffrrmmm as mza_j, a.lado as lado_j,
         Null::text as arc_tipo, Null::integer as arc_codigo
     from doblando d
@@ -88,7 +88,7 @@ lado_para_doblar as (
 --  para calcular los lados de cruzar y volver
 
 manzanas_adyacentes as (
-    select mzad as mza_i, mzai as mza_j, tipo as arc_tipo, codigo20 as arc_codigo
+    select distinct mzad as mza_i, mzai as mza_j, tipo as arc_tipo, codigo20 as arc_codigo
     -- agrega tipo y codigo para calcular costo de pasar a mza adyacente
     from arcos
     where substr(mzad,1,12) = substr(mzai,1,12) -- mismo PPDDDLLLFFRR
@@ -110,15 +110,17 @@ manzanas_adyacentes as (
 ---- la intersección es 1 linea
 
 lado_de_enfrente as (
-    select i.ppdddlllffrrmmm as mza_i, i.lado as lado_i,
+    select distinct i.ppdddlllffrrmmm as mza_i, i.lado as lado_i,
         j.ppdddlllffrrmmm as mza_j, j.lado as lado_j,
         a.arc_tipo, a.arc_codigo
     from lados_de_manzana i
     join lados_de_manzana j
     on i.nodo_j_geom = j.nodo_i_geom -- el lado_i termina donde el lado_j empieza
     -- los lados van de nodo_i a nodo_j
+    and i.codigos = j.codigos -- mismo eje
     join manzanas_adyacentes a
     on i.ppdddlllffrrmmm = a.mza_i and j.ppdddlllffrrmmm = a.mza_j -- las manzanas son adyacentes
+    and a.arc_codigo = any(j.codigos) -- mismo eje
     where ST_Dimension(ST_Intersection(i.wkb_geometry,j.wkb_geometry)) = 1
     ),
 
@@ -128,7 +130,7 @@ lado_de_enfrente as (
 ---- la intersección es 1 punto
 
 lado_para_cruzar as (
-    select i.ppdddlllffrrmmm as mza_i, i.lado as lado_i,
+    select distinct i.ppdddlllffrrmmm as mza_i, i.lado as lado_i,
         j.ppdddlllffrrmmm as mza_j, j.lado as lado_j,
         a.arc_tipo, a.arc_codigo
     from lados_de_manzana i
@@ -136,17 +138,19 @@ lado_para_cruzar as (
     on i.nodo_j_geom = j.nodo_i_geom
     -- el lado_i termina donde el lado_j empieza
     -- los lados van de nodo_i a nodo_j
+    and i.codigos = j.codigos -- mismo eje
     join manzanas_adyacentes a
     on i.ppdddlllffrrmmm = a.mza_i and j.ppdddlllffrrmmm = a.mza_j
     -- las manzanas son adyacentes
+    and a.arc_codigo = any(j.codigos) -- mismo eje
     where ST_Dimension(ST_Intersection(i.wkb_geometry,j.wkb_geometry)) = 0
     )
 
-select mza_i, lado_i::integer, mza_j, lado_j::integer, arc_tipo, arc_codigo, ''dobla''::text as tipo from lado_para_doblar
+select mza_i, lado_i::integer, mza_j, lado_j::integer, arc_tipo, arc_codigo::integer, ''dobla''::text as tipo from lado_para_doblar
 union
-select mza_i, lado_i::integer, mza_j, lado_j::integer, arc_tipo, arc_codigo, ''enfrente''::text from lado_de_enfrente
+select mza_i, lado_i::integer, mza_j, lado_j::integer, arc_tipo, arc_codigo::integer, ''enfrente''::text from lado_de_enfrente
 union
-select mza_i, lado_i::integer, mza_j, lado_j::integer, arc_tipo, arc_codigo, ''cruza''::text from lado_para_cruzar
+select mza_i, lado_i::integer, mza_j, lado_j::integer, arc_tipo, arc_codigo::integer, ''cruza''::text from lado_para_cruzar
 ;'
 ;
 
