@@ -1,4 +1,4 @@
-drop table public.corrida;
+drop table if exists public.corrida;
 CREATE TABLE public.corrida (
     comando text,
     prov integer,
