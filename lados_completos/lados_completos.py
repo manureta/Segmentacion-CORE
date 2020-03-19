@@ -94,7 +94,7 @@ def cuantas_manzanas(estos):
 cantidad_de_viviendas_deseada_por_segmento = 20
 cantidad_de_viviendas_maxima_deseada_por_segmento = 23
 cantidad_de_viviendas_minima_deseada_por_segmento = 17
-cantidad_de_viviendas_permitida_para_romper_manazna = 5
+cantidad_de_viviendas_permitida_para_romper_manzana = 5
 multa_fuera_rango_superior = 1
 multa_fuera_rango_inferior = 1
 
@@ -231,7 +231,8 @@ import os
 #_prov = 54
 #_dpto = 105 # ahora vienen en arg
 
-conexion = ["censo2020", "segmentador", "rodatnemges", "172.26.67.239", "5432"]
+#conexion = ["censo2020", "segmentador", "rodatnemges", "172.26.67.239", "5432"]
+conexion = ["CPHyV2020", "halpe", "halpe", "172.26.68.174", "5432"]
 conn = psycopg2.connect(
             database = conexion[0],
             user = conexion[1],
@@ -280,7 +281,7 @@ for prov, dpto, frac, radio in radios:
         cur = conn.cursor()
         sql = ("select mza, sum(conteo)::int from segmentacion.conteos"
             + sql_where_pdfr(prov, dpto, frac, radio)
-            + "\ngroup by mza;")
+            + "\ngroup by mza order by mza;")
         cur.execute(sql)
         conteos_mzas = cur.fetchall()
         manzanas = [mza for mza, conteo in conteos_mzas]
@@ -303,6 +304,7 @@ for prov, dpto, frac, radio in radios:
         sql = ("select mza, max(lado) from segmentacion.conteos"
             + sql_where_pdfr(prov, dpto, frac, radio)
             + "\ngroup by mza;")
+        print (sql)
         cur.execute(sql)
         mza_ultimo_lado = cur.fetchall()
 
@@ -313,7 +315,8 @@ for prov, dpto, frac, radio in radios:
         sql = ("select mza, mza_ady from segmentacion.adyacencias"
             + sql_where_pdfr(prov, dpto, frac, radio)
             + "\n and mza != mza_ady" + excluir
-            + "\ngroup by mza, mza_ady;")
+            + "\norder by mza, mza_ady;"
+            )
 #        print(sql)
         cur.execute(sql)
         adyacencias_mzas_mzas = cur.fetchall()
@@ -321,6 +324,7 @@ for prov, dpto, frac, radio in radios:
         sql = ("select mza, mza_ady, lado_ady from segmentacion.adyacencias"
             + sql_where_pdfr(prov, dpto, frac, radio)
             + "\n and mza != mza_ady" + excluir
+            + "\norder by mza, mza_ady, lado_ady;"
             + ";")
         cur.execute(sql)
         result = cur.fetchall()
@@ -329,6 +333,7 @@ for prov, dpto, frac, radio in radios:
         sql = ("select mza, lado, mza_ady from segmentacion.adyacencias"
             + sql_where_pdfr(prov, dpto, frac, radio)
             + "\n and mza != mza_ady" + excluir
+            + "\norder by mza, lado, mza_ady;"
             + ";")
         cur.execute(sql)
         result = cur.fetchall()
@@ -337,6 +342,7 @@ for prov, dpto, frac, radio in radios:
         sql = ("select mza, lado, mza_ady, lado_ady from segmentacion.adyacencias"
             + sql_where_pdfr(prov, dpto, frac, radio)
             + "\n and mza != mza_ady" + excluir
+            + "\norder by mza, lado, mza_ady, lado_ady;"
             + ";")
         cur.execute(sql)
         result = cur.fetchall()
@@ -383,6 +389,7 @@ for prov, dpto, frac, radio in radios:
         adyacencias.extend([((mza, lado), (mza_ady, lado_ady))
                         for (mza, lado), (mza_ady, lado_ady) in lados_contiguos])
         # se agregan los lados correspondientes a esas manzanas
+        print ((adyacencias))
 
         #print >> sys.stderr, "componentes"
         #print >> sys.stderr, componentes

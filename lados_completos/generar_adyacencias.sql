@@ -55,6 +55,7 @@ lados_de_manzana as (
     select row_number() over() as id, *,
         ST_StartPoint(wkb_geometry) as nodo_i_geom, ST_EndPoint(wkb_geometry) as nodo_j_geom
     from lados_orientados
+
     ),
 
 ---- que se puede hacer al llegar a la esquina
@@ -75,8 +76,9 @@ doblando as (
     where lado != 0
     ),
 lado_para_doblar as (
-    select ppdddlllffrrmmm as mza_i, de_lado as lado_i,
-        ppdddlllffrrmmm as mza_j, a.lado as lado_j
+    select distinct ppdddlllffrrmmm as mza_i, de_lado as lado_i,
+        ppdddlllffrrmmm as mza_j, a.lado as lado_j,
+        Null::text as arc_tipo, Null::integer as arc_codigo
     from doblando d
     join lados_de_manzana a
     using(ppdddlllffrrmmm, lado)
@@ -86,17 +88,20 @@ lado_para_doblar as (
 --  para calcular los lados de cruzar y volver
 
 manzanas_adyacentes as (
-    select mzad as mza_i, mzai as mza_j
+    select distinct mzad as mza_i, mzai as mza_j, tipo as arc_tipo, codigo20 as arc_codigo
+    -- agrega tipo y codigo para calcular costo de pasar a mza adyacente
     from arcos
     where substr(mzad,1,12) = substr(mzai,1,12) -- mismo PPDDDLLLFFRR
         and mzad is not Null and mzad != '''' and ladod != 0
         and mzai is not Null and mzai != '''' and ladod != 0
+        and mzai != mzad
     union -- hacer simétrica
-    select mzai, mzad
+    select mzai as mza_i, mzad as mza_j, tipo as arc_tipo, codigo20 as arc_codigo
     from arcos
     where substr(mzad,1,12) = substr(mzai,1,12) -- mismo PPDDDLLLFFRR
-    and mzad is not Null and mzad != '''' and ladod != 0
-    and mzai is not Null and mzai != '''' and ladod != 0
+        and mzad is not Null and mzad != '''' and ladod != 0
+        and mzai is not Null and mzai != '''' and ladod != 0
+        and mzad != mzai
     ),
 
 ---- "volver" en realidad es que está en frente -------------------
@@ -105,14 +110,17 @@ manzanas_adyacentes as (
 ---- la intersección es 1 linea
 
 lado_de_enfrente as (
-    select i.ppdddlllffrrmmm as mza_i, i.lado as lado_i,
-        j.ppdddlllffrrmmm as mza_j, j.lado as lado_j
+    select distinct i.ppdddlllffrrmmm as mza_i, i.lado as lado_i,
+        j.ppdddlllffrrmmm as mza_j, j.lado as lado_j,
+        a.arc_tipo, a.arc_codigo
     from lados_de_manzana i
     join lados_de_manzana j
     on i.nodo_j_geom = j.nodo_i_geom -- el lado_i termina donde el lado_j empieza
     -- los lados van de nodo_i a nodo_j
+    and i.codigos = j.codigos -- mismo eje
     join manzanas_adyacentes a
     on i.ppdddlllffrrmmm = a.mza_i and j.ppdddlllffrrmmm = a.mza_j -- las manzanas son adyacentes
+    and a.arc_codigo = any(j.codigos) -- mismo eje
     where ST_Dimension(ST_Intersection(i.wkb_geometry,j.wkb_geometry)) = 1
     ),
 
@@ -122,24 +130,27 @@ lado_de_enfrente as (
 ---- la intersección es 1 punto
 
 lado_para_cruzar as (
-    select i.ppdddlllffrrmmm as mza_i, i.lado as lado_i,
-        j.ppdddlllffrrmmm as mza_j, j.lado as lado_j
+    select distinct i.ppdddlllffrrmmm as mza_i, i.lado as lado_i,
+        j.ppdddlllffrrmmm as mza_j, j.lado as lado_j,
+        a.arc_tipo, a.arc_codigo
     from lados_de_manzana i
     join lados_de_manzana j
     on i.nodo_j_geom = j.nodo_i_geom
     -- el lado_i termina donde el lado_j empieza
     -- los lados van de nodo_i a nodo_j
+    and i.codigos = j.codigos -- mismo eje
     join manzanas_adyacentes a
     on i.ppdddlllffrrmmm = a.mza_i and j.ppdddlllffrrmmm = a.mza_j
     -- las manzanas son adyacentes
+    and a.arc_codigo = any(j.codigos) -- mismo eje
     where ST_Dimension(ST_Intersection(i.wkb_geometry,j.wkb_geometry)) = 0
     )
 
-select *, ''dobla''::text as tipo from lado_para_doblar
+select mza_i, lado_i::integer, mza_j, lado_j::integer, arc_tipo, arc_codigo::integer, ''dobla''::text as tipo from lado_para_doblar
 union
-select *, ''enfrente''::text from lado_de_enfrente
+select mza_i, lado_i::integer, mza_j, lado_j::integer, arc_tipo, arc_codigo::integer, ''enfrente''::text from lado_de_enfrente
 union
-select *, ''cruza''::text from lado_para_cruzar
+select mza_i, lado_i::integer, mza_j, lado_j::integer, arc_tipo, arc_codigo::integer, ''cruza''::text from lado_para_cruzar
 ;'
 ;
 
@@ -154,9 +165,9 @@ where shape = ''' || localidad || '''
 
 
 execute '
-insert into segmentacion.adyacencias
+insert into segmentacion.adyacencias (shape, prov, dpto, codloc, frac, radio, mza, lado, mza_ady, lado_ady, tipo)
 select ''' || localidad || '''::text as shape, substr(mza_i,1,2)::integer as prov,
-    substr(mza_i,3,3)::integer as depto,
+    substr(mza_i,3,3)::integer as dpto,
     substr(mza_i,6,3)::integer as codloc,
     substr(mza_i,9,2)::integer as frac,
     substr(mza_i,11,2)::integer as radio,
