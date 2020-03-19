@@ -225,6 +225,7 @@ def vecindario(segmentacion):
 import psycopg2
 import operator
 import time
+import os
 
 #_table = '0339'  # San Javier
 #_prov = 54
