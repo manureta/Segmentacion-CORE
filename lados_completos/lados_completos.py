@@ -230,9 +230,15 @@ import os
 #_table = '0339'  # San Javier
 #_prov = 54
 #_dpto = 105 # ahora vienen en arg
-
+print(os.environ)
+conexion = [
+    os.environ.get('MANDARINA_DATABASE', 'laravel'),
+    os.environ.get('MANDARINA_USER', 'laravel'),
+    os.environ.get('MANDARINA_PASS', 'laravel'),
+    os.environ.get('MANDARINA_HOST', '127.0.0.1'),
+    os.environ.get('MANDARINA_PORT', '5432')
+]
 #conexion = ["censo2020", "segmentador", "rodatnemges", "172.26.67.239", "5432"]
-conexion = ["CPHyV2020", "halpe", "halpe", "172.26.68.174", "5432"]
 conn = psycopg2.connect(
             database = conexion[0],
             user = conexion[1],
