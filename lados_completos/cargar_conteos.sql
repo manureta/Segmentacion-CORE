@@ -21,6 +21,7 @@ execute 'drop table if exists "' || localidad || '".conteos;';
 execute 'delete from segmentacion.conteos where tabla = ''' || localidad || ''';';
 
 execute '
+drop table if exists "' || localidad || '".conteos;
 create table "' || localidad || '".conteos as
 with listado_sin_vacios as (
     select
@@ -111,9 +112,12 @@ $function$
 ----------------------------------------
 
 --- to be deprecated
+
+create schema if not exists segmentacion;
+
 -- crea tabla segmentacion.conteos
-create schema segmentacion;
-CREATE TABLE segmentacion.conteos (
+
+CREATE TABLE if not exists segmentacion.conteos (
     tabla text,
     prov integer,
     dpto integer,
@@ -127,7 +131,7 @@ CREATE TABLE segmentacion.conteos (
 );
 
 --- crea la tabla global to be deprecated
-CREATE TABLE segmentacion.adyacencias (
+CREATE TABLE if not exists segmentacion.adyacencias (
     shape text,
     prov integer,
     dpto integer,
