@@ -111,6 +111,7 @@ $function$
 ;
 ----------------------------------------
 
+<<<<<<< HEAD
 --- to be deprecated
 
 create schema if not exists segmentacion;
@@ -149,4 +150,6 @@ CREATE TABLE if not exists segmentacion.adyacencias (
 
 
 
+=======
+>>>>>>> master
 
