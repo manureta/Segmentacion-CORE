@@ -281,8 +281,10 @@ import DAO
 
 dao = DAO.DAO()
 #dao.db('segmentador:rodatnemges:censo2020:172.26.67.239')
-#dao.db('halpe:halpe:CPHyV2020:172.26.68.174')
-conn_str = sys.argv[10]
+if len(sys.argv) > 10:
+    conn_str = sys.argv[10]
+else:
+    dao.db('halpe:halpe:CPHyV2020:172.26.68.174')
 dao.db(conn_str)
 
 radios = dao.get_radios(_table)
