@@ -281,7 +281,9 @@ import DAO
 
 dao = DAO.DAO()
 #dao.db('segmentador:rodatnemges:censo2020:172.26.67.239')
-dao.db('halpe:halpe:CPHyV2020:172.26.68.174')
+#dao.db('halpe:halpe:CPHyV2020:172.26.68.174')
+conn_str = sys.argv[10]
+dao.db(conn_str)
 
 radios = dao.get_radios(_table)
 
@@ -329,7 +331,7 @@ for prov, dpto, frac, radio in radios:
                             if conteo > cantidad_de_viviendas_permitida_para_romper_manzana]
 
         print ('manzanas a partir:', mzas_excedidas)
-        print ('lados excedidas:', lados_excedidos)
+        print ('lados excedidos:', lados_excedidos)
 
 
         componentes = [mza for mza in manzanas if mza not in mzas_excedidas]
@@ -360,11 +362,12 @@ for prov, dpto, frac, radio in radios:
 #        adyacencias = list(set(adyacencias))
 
 #        print (adyacencias)
-        adyacencias = [(este, ese) for (este, ese) in adyacencias if este not in lados_excedidos and ese not in lados_excedidos]
+        if len(sys.argv) > 11 and sys.argv[11] == 'filtrar':
+            adyacencias = [(este, ese) for (este, ese) in adyacencias if este not in lados_excedidos and ese not in lados_excedidos]
 #        print (adyacencias)
 #        print (lados_excedidos)
 #        print (componentes)
-        componentes = list(set(componentes) - set(lados_excedidos))
+            componentes = list(set(componentes) - set(lados_excedidos))
 #        print (componentes)
 
 
