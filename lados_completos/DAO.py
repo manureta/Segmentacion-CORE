@@ -36,8 +36,7 @@ class DAO:
             self.conn = psycopg2.connect(user=self.user, password=self.passwd,
                 dbname=self.dbname, host=self.host, port=self.port)
         except psycopg2.Error as e:
-            print ('cannot connect', db_string)
-            print (e)
+            raise Exception('cannot connect', db_string)
         self.cur = self.conn.cursor()
         return 
 
