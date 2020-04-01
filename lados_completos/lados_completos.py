@@ -282,10 +282,10 @@ import DAO
 dao = DAO.DAO()
 #dao.db('segmentador:rodatnemges:censo2020:172.26.67.239')
 conexion = [
-    os.environ.get('MANDARINA_DATABASE', 'censo2020'),
-    os.environ.get('MANDARINA_USER', 'segmentador'),
-    os.environ.get('MANDARINA_PASS', 'rodatnemges'),
-    os.environ.get('MANDARINA_HOST', '172.26.67.239'),
+    os.environ.get('MANDARINA_USER', 'alpe'),
+    os.environ.get('MANDARINA_PASS', 'alpe'),
+    os.environ.get('MANDARINA_DATABASE', 'CPHyV2020'),
+    os.environ.get('MANDARINA_HOST', 'localhost'),
     os.environ.get('MANDARINA_PORT', '5432')
 ]
 #conexion = ["censo2020", "segmentador", "rodatnemges", "172.26.67.239", "5432"]
