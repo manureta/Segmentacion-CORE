@@ -10,18 +10,18 @@ autor: -h+M
 fecha: 2020-01
 */
 
-create or replace function indec.cargar_conteos(localidad text)
+create or replace function indec.cargar_conteos(aglomerado text)
  returns integer
  language plpgsql volatile
 set client_min_messages = error
 as $function$
 
 begin
-execute 'drop table if exists "' || localidad || '".conteos;';
-execute 'delete from segmentacion.conteos where tabla = ''' || localidad || ''';';
+execute 'drop table if exists "' || aglomerado || '".conteos;';
+execute 'delete from segmentacion.conteos where tabla = ''' || aglomerado || ''';';
 
 execute '
-create table "' || localidad || '".conteos as
+create table "' || aglomerado || '".conteos as
 with listado_sin_vacios as (
     select
     id, prov::integer, dpto::integer, codaglo, codloc::integer,
@@ -29,7 +29,7 @@ with listado_sin_vacios as (
     tipoviv
     from
     -------------------- listado --------------------------
-    "' || localidad || '".listado
+    "' || aglomerado || '".listado
     -------------------------------------------------------
     where prov::text!='''' and dpto::text!=''''  and codloc::text!=''''
     and frac::text!='''' and radio::text!='''' and mza::text !='''' and lado::text !=''''
@@ -39,8 +39,8 @@ with listado_sin_vacios as (
     select codigo10, nomencla, codigo20, ancho, anchomed, tipo, nombre, ladoi, ladod, desdei, desded, hastai, hastad, mzai, mzad,
     codloc20, nomencla10, nomenclai, nomenclad, wkb_geometry,
     -------------------- nombre de covertura y tabla de shape
-    ''' || localidad || '.arc''::text as cover
-    from "' || localidad || '".arc
+    ''' || aglomerado || '.arc''::text as cover
+    from "' || aglomerado || '".arc
     ---------------------------------------------------------
     ),
     lados_de_manzana as (
@@ -77,7 +77,7 @@ with listado_sin_vacios as (
     left join listado_sin_vacios using (prov,dpto,codloc,frac,radio,mza,lado)
     ),
     conteos as (
-    select ''' || localidad || '''::text as tabla, prov, dpto dpto, codloc,
+    select ''' || aglomerado || '''::text as tabla, prov, dpto dpto, codloc,
         frac, radio, mza, lado,
         count(indec.contar_vivienda(tipoviv)) as conteo
     from listado_carto
@@ -92,13 +92,13 @@ select * from conteos;
 execute '
 delete 
 from segmentacion.conteos
-where tabla = ''' || localidad || '''
+where tabla = ''' || aglomerado || '''
 ;
 insert into segmentacion.conteos (tabla, prov, dpto, codloc, frac, radio, mza, lado, conteo)
 -- inserta en tabla global de conteos
-select ''' || localidad || '''::text as tabla, prov, dpto, codloc,
+select ''' || aglomerado || '''::text as tabla, prov, dpto, codloc,
     frac, radio, mza, lado, conteo
-from "' || localidad || '".conteos 
+from "' || aglomerado || '".conteos 
 ';
 
 return 1;

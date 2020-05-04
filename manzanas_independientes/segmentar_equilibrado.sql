@@ -13,20 +13,20 @@ fecha: 2019-06-05 Mi
 
 
 create or replace function 
-indec.segmentar_equilibrado(localidad text, deseado integer)
+indec.segmentar_equilibrado(aglomerado text, deseado integer)
     returns integer
     language plpgsql volatile
     set client_min_messages = error
 as $function$
 
 begin
-execute 'drop table if exists "' || localidad || '".segmentacion;';
+execute 'drop table if exists "' || aglomerado || '".segmentacion;';
 execute '
-create table "' || localidad || '".segmentacion as
+create table "' || aglomerado || '".segmentacion as
 with 
 parametros as (
     select ' || deseado || '::float as deseado),
-listado as (select * from "' || localidad || '".listado),
+listado as (select * from "' || aglomerado || '".listado),
 listado_sin_nulos as (
     select id, prov, dpto, codloc, frac, radio, mza, lado, nrocatastr,
     coalesce(sector,'''') sector, coalesce(edificio,'''') edificio, coalesce(entrada,'''') entrada,

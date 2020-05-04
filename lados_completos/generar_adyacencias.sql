@@ -3,7 +3,7 @@ function de CORE
 2da de enero 2020 
 */
 
-CREATE OR REPLACE FUNCTION indec.generar_adyacencias(localidad text)
+CREATE OR REPLACE FUNCTION indec.generar_adyacencias(aglomerado text)
  RETURNS integer
  LANGUAGE plpgsql volatile
 SET client_min_messages = error
@@ -11,14 +11,14 @@ AS $function$
 
 begin
 
-execute 'drop table if exists "' || localidad || '".lados_adyacentes;';
+execute 'drop table if exists "' || aglomerado || '".lados_adyacentes;';
 
 execute '
-create table "' || localidad || '".lados_adyacentes as 
+create table "' || aglomerado || '".lados_adyacentes as 
 
 with 
 
-arcos as (select * from "' || localidad || '".arc),
+arcos as (select * from "' || aglomerado || '".arc),
 
 pedacitos_de_lado as (-- mza como PPDDDLLLFFRRMMM select mzad as mza, ladod as lado, avg(anchomed) as anchomed,
     select mzad as mza, ladod as lado,
@@ -159,14 +159,14 @@ select mza_i, lado_i::integer, mza_j, lado_j::integer, arc_tipo, arc_codigo::int
 execute '
 delete
 from segmentacion.adyacencias
-where shape = ''' || localidad || '''
+where shape = ''' || aglomerado || '''
 ;'
 ;
 
 
 execute '
 insert into segmentacion.adyacencias (shape, prov, dpto, codloc, frac, radio, mza, lado, mza_ady, lado_ady, tipo)
-select ''' || localidad || '''::text as shape, substr(mza_i,1,2)::integer as prov,
+select ''' || aglomerado || '''::text as shape, substr(mza_i,1,2)::integer as prov,
     substr(mza_i,3,3)::integer as dpto,
     substr(mza_i,6,3)::integer as codloc,
     substr(mza_i,9,2)::integer as frac,
@@ -174,7 +174,7 @@ select ''' || localidad || '''::text as shape, substr(mza_i,1,2)::integer as pro
     substr(mza_i,13,3)::integer as mza, lado_i,
     substr(mza_j,13,3)::integer as mza_ady, lado_j as lado_ady,
     tipo
-from "' || localidad || '".lados_adyacentes;
+from "' || aglomerado || '".lados_adyacentes;
 ;'
 ;
 

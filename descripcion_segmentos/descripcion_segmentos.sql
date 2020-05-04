@@ -22,22 +22,22 @@ ejemplo:
 
 */
 
-create or replace function indec.descripcion_segmentos(localidad text)
+create or replace function indec.descripcion_segmentos(aglomerado text)
  returns integer
  language plpgsql volatile
 set client_min_messages = error
 as $function$
 
 begin
-execute 'drop view if exists "' || localidad || '".descripcion_segmentos;';
+execute 'drop view if exists "' || aglomerado || '".descripcion_segmentos;';
 
 execute '
-create view "' || localidad || '".descripcion_segmentos as 
+create view "' || aglomerado || '".descripcion_segmentos as 
 with 
 e00 as (
     select * from
     -------------------- cobertura-------------------------
-    "' || localidad || '".arc
+    "' || aglomerado || '".arc
     -------------------------------------------------------
     ),
 seg_mza_lados as (
