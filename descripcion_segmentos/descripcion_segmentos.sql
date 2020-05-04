@@ -9,13 +9,16 @@ autor: -h
 fecha: 2/5/2020
 
 ejemplo:
- prov | depto | frac | radio | seg |                                                                                                                                  descripcion                                                                                                                                  
-------+-------+------+-------+-----+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
- 38   | 028   | 04   | 01    |   1 | manzana 001 completa, manzana 002 lados 03 04 01, manzana 019 completa, manzana 020 completa, manzana 021 completa
- 38   | 028   | 04   | 01    |   2 | manzana 002 lado 02, manzana 003 lados 03 04, manzana 022 completa
- 38   | 028   | 04   | 01    |   3 | manzana 003 lados 01 02, manzana 004 lados 03 04, manzana 006 lados 03 04
- 38   | 028   | 04   | 01    |   4 | manzana 004 lados 01 02, manzana 005 lados 03 04, manzana 006 lado 01
- 38   | 028   | 04   | 01    |   5 | manzana 005 lados 01 02, manzana 008 lado 04
+ ppdddlllffrr | prov | depto | codloc | frac | radio | segmento |                                                                                                                             descripcion                                                                                                                             
+--------------+------+-------+--------+------+-------+----------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ 380280400401 | 38   | 028   | 040    | 04   | 01    | 01       | manzana 001 completa, manzana 002 lados 3 4 1, manzana 019 completa, manzana 020 completa, manzana 021 completa
+ 380280400401 | 38   | 028   | 040    | 04   | 01    | 02       | manzana 002 lado 2, manzana 003 lados 3 4, manzana 022 completa
+ 380280400401 | 38   | 028   | 040    | 04   | 01    | 03       | manzana 003 lados 1 2, manzana 004 lados 3 4, manzana 006 lados 3 4
+ 380280400401 | 38   | 028   | 040    | 04   | 01    | 04       | manzana 004 lados 1 2, manzana 005 lados 3 4, manzana 006 lado 1
+ 380280400401 | 38   | 028   | 040    | 04   | 01    | 05       | manzana 005 lados 1 2, manzana 008 lado 4
+ 380280400401 | 38   | 028   | 040    | 04   | 01    | 06       | manzana 006 lado 2, manzana 007 lados 3 4
+ 380280400401 | 38   | 028   | 040    | 04   | 01    | 07       | manzana 007 lado 1, manzana 008 lados 1 2 3, manzana 009 lados 3 4, manzana 010 lado 1
+ 380280400401 | 38   | 028   | 040    | 04   | 01    | 08       | manzana 007 lado 2, manzana 010 lados 3 4
 
 */
 
@@ -39,12 +42,12 @@ e00 as (
     ),
 seg_mza_lados as (
     select substr(mzai,1,12) as ppdddlllffrr, 
-    segi as seg, substr(mzai,13,3) as mza, lpad(ladoi::text,2,''0'') as lado
+    segi as seg, substr(mzai,13,3) as mza, ladoi as lado
     from e00
     where mzai is not Null and mzai != '''' and ladoi != 0
     union
     select substr(mzad,1,12) as ppdddlllffrr,
-    segd as seg, substr(mzad,13,3) as mza, lpad(ladod::text,2,''0'') as lado
+    segd as seg, substr(mzad,13,3) as mza, ladod as lado
     from e00
     where mzad is not Null and mzad != '''' and ladod != 0
     ),
@@ -125,7 +128,8 @@ descripcion_mza as (
 select ppdddlllffrr, 
        substr(ppdddlllffrr,1,2)::char(2) as prov, substr(ppdddlllffrr,3,3)::char(3) as depto, 
        substr(ppdddlllffrr,6,3)::char(3) as codloc, 
-       substr(ppdddlllffrr,9,2)::char(2) as frac, substr(ppdddlllffrr,11,2)::char(2) as radio, seg, 
+       substr(ppdddlllffrr,9,2)::char(2) as frac, substr(ppdddlllffrr,11,2)::char(2) as radio, 
+       lpad(seg::text,2,''0'') as segmento, 
     string_agg(descripcion,'', '') as descripcion
 from descripcion_mza
 group by ppdddlllffrr, seg
