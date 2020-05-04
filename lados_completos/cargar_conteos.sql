@@ -79,10 +79,7 @@ with listado_sin_vacios as (
     conteos as (
     select ''' || localidad || '''::text as tabla, prov, dpto dpto, codloc,
         frac, radio, mza, lado,
-        count(case
-          when trim(tipoviv) in ('''', ''co'', ''n'', ''ca/'', ''lo'')
-            then null
-            else tipoviv end) conteo
+        count(indec.contar_vivienda(tipoviv)) as conteo
     from listado_carto
     group by prov, dpto, codloc, frac, radio, mza, lado, geom
     order by count(case when trim(tipoviv)='''' then null else tipoviv end) desc
