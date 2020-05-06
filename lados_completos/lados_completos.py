@@ -7,7 +7,7 @@ _table = sys.argv[1]
 parametro1 = _table.split('.')
 _table = parametro1[0]
 _prov = int(sys.argv[2])
-_dpto = int(sys.argv[3])
+_depto = int(sys.argv[3])
 _frac = int(sys.argv[4])
 _radio = int(sys.argv[5])
 
@@ -275,12 +275,25 @@ def vecindario(segmentacion):
 import psycopg2
 import operator
 import time
+import os
 
 import DAO
 
 dao = DAO.DAO()
 #dao.db('segmentador:rodatnemges:censo2020:172.26.67.239')
-dao.db('halpe:halpe:CPHyV2020:172.26.68.174')
+conexion = [
+    os.environ.get('MANDARINA_USER', 'alpe'),
+    os.environ.get('MANDARINA_PASS', 'alpe'),
+    os.environ.get('MANDARINA_DATABASE', 'CPHyV2020'),
+    os.environ.get('MANDARINA_HOST', 'localhost'),
+    os.environ.get('MANDARINA_PORT', '5432')
+]
+#conexion = ["censo2020", "segmentador", "rodatnemges", "172.26.67.239", "5432"]
+if len(sys.argv) > 10:
+    conn_str = sys.argv[10]
+else:
+    conn_str = ':'.join(conexion)
+dao.db(conn_str)
 
 radios = dao.get_radios(_table)
 
@@ -298,7 +311,6 @@ for prov, dpto, frac, radio in radios:
 
         costos_adyacencias = [((mza, lado), (mza_ady, lado_ady), costo) for mza, lado, mza_ady, lado_ady, costo 
             in dao.get_costos_adyacencias(_table, prov, dpto, frac, radio)]
-        #print (costos_adyacencias)
 
         adyacencias_mzas_mzas = dao.get_adyacencias_mzas_mzas(_table, prov, dpto, frac, radio)
 
@@ -310,11 +322,9 @@ for prov, dpto, frac, radio in radios:
 
         lados_enfrentados = [((mza, lado), (mza_ady, lado_ady)) for mza, lado, mza_ady, lado_ady 
             in dao.get_adyacencias_lados_enfrentados(_table, prov, dpto, frac, radio)]
-#        print ('lados_enfrentados', lados_enfrentados)
 
         lados_contiguos = [((mza, lado), (mza_ady, lado_ady)) for mza, lado, mza_ady, lado_ady
             in dao.get_adyacencias_lados_contiguos(_table, prov, dpto, frac, radio)]
-#       print ('lados_contiguos', lados_contiguos)
 
         conteos = conteos_mzas
         adyacencias = adyacencias_mzas_mzas
@@ -328,7 +338,7 @@ for prov, dpto, frac, radio in radios:
                             if conteo > cantidad_de_viviendas_permitida_para_romper_manzana]
 
         print ('manzanas a partir:', mzas_excedidas)
-        print ('lados excedidas:', lados_excedidos)
+        print ('lados excedidos:', lados_excedidos)
 
 
         componentes = [mza for mza in manzanas if mza not in mzas_excedidas]
@@ -351,20 +361,14 @@ for prov, dpto, frac, radio in radios:
         adyacencias.extend([((mza, lado), (mza_ady, lado_ady))
                         for (mza, lado), (mza_ady, lado_ady) in lados_contiguos])
         # se agregan los lados correspondientes a esas manzanas
-        #print ((adyacencias))
-        #print >> sys.stderr, "componentes"
-        #print >> sys.stderr, componentes
 #
 #        adyacencias.extend((ese, este) for (este, ese) in adyacencias)
 #        adyacencias = list(set(adyacencias))
 
 #        print (adyacencias)
-        adyacencias = [(este, ese) for (este, ese) in adyacencias if este not in lados_excedidos and ese not in lados_excedidos]
-#        print (adyacencias)
-#        print (lados_excedidos)
-#        print (componentes)
-        componentes = list(set(componentes) - set(lados_excedidos))
-#        print (componentes)
+        if len(sys.argv) > 11 and sys.argv[11] == 'filtrar':
+            adyacencias = [(este, ese) for (este, ese) in adyacencias if este not in lados_excedidos and ese not in lados_excedidos]
+            componentes = list(set(componentes) - set(lados_excedidos))
 
 
         # elimina lado con más de cant deseada para aplicarles el otro algoritmo
@@ -373,7 +377,6 @@ for prov, dpto, frac, radio in radios:
 
         if adyacencias:
             start = time.time()
-#            print (adyacencias)
 
             # crea los dictionary
             componentes_en_adyacencias = list(set([cpte for cpte, cpte_ady in adyacencias]))
@@ -394,8 +397,6 @@ for prov, dpto, frac, radio in radios:
             for cpte, adyacente in adyacencias:
                 adyacentes[cpte] = adyacentes[cpte] + [adyacente]
                 adyacentes[adyacente] = adyacentes[adyacente] + [cpte]
-#            for manzana in sorted(adyacentes.iterkeys()):
-#                print (manzana, adyacentes[manzana])
 
             # optimización
 
@@ -456,10 +457,7 @@ for prov, dpto, frac, radio in radios:
                    "costo", costo(segmento), 
                    "componentes", segmento,
                     "cuantas_manzanas", cuantas_manzanas(segmento)
-#                   "adyacencias", adyacencias_componentes(segmento),
-#                   "costo_adyacencias", sum([costo_adyacencia(ady) for ady in adyacencias_componentes(segmento) if costo_adyacencia(ady)])
                     ])
-#            print ((vecindario(mejor_solucion)))
 
             print ("deseada: %d, máxima: %d, mínima: %d" % (cantidad_de_viviendas_deseada_por_segmento,
                 cantidad_de_viviendas_maxima_deseada_por_segmento, 
@@ -477,30 +475,24 @@ for prov, dpto, frac, radio in radios:
                 for cpte in segmento:
                     segmentos[cpte] = s + 1
             
-            # por ahora solo junin de los andes buscar la tabla usando una relacion prov, dpto - aglomerado
+            # por ahora solo junin de los andes buscar la tabla usando una relacion prov, depto - aglomerado
 #------
 # update _table = shapes.eAAAAa  (usando lados)
 #------
             for cpte in componentes:
                dao.set_componente_segmento(_table, prov, dpto, frac, radio, cpte, segmentos[cpte])
-#            raw_input("Press Enter to continue...")
         else:
             print ("sin adyacencias")
-#    else:
-#        print ("radio Null")
 
 # guarda ejecucion
 import os
 pwd = os.path.dirname(os.path.realpath(__file__))
-#print(pwd)
 import socket
 host = socket.gethostname()
 import getpass
 user = getpass.getuser()
 user_host = user + '@' + host
 comando = " ".join(sys.argv[:])
-print('[' + user_host + ']$ python ' + pwd + '/' + comando)
-print(":".join(dao.conn_info))
 import datetime
 
 dao.set_corrida(comando, user_host, pwd, prov, dpto, frac, radio, datetime.datetime.now())

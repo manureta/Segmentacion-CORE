@@ -21,11 +21,12 @@ execute 'drop table if exists "' || localidad || '".conteos;';
 execute 'delete from segmentacion.conteos where tabla = ''' || localidad || ''';';
 
 execute '
+drop table if exists "' || localidad || '".conteos;
 create table "' || localidad || '".conteos as
-with listado_sin_vacios as (
-    select
-    id, prov::integer, dpto::integer, codaglo, codloc::integer,
-    codent, frac::integer, radio::integer, mza::integer, lado::integer,
+WITH listado_sin_vacios AS (
+    SELECT
+    id, prov::integer, nom_provin, dpto::integer, nom_dpto, codaglo, codloc::integer,
+    nom_loc, codent, nom_ent, frac::integer, radio::integer, mza::integer, lado::integer,
     tipoviv
     from
     -------------------- listado --------------------------
@@ -109,5 +110,43 @@ end;
 $function$
 ;
 ----------------------------------------
+
+--- to be deprecated
+
+create schema if not exists segmentacion;
+
+-- crea tabla segmentacion.conteos
+
+CREATE TABLE if not exists segmentacion.conteos (
+    tabla text,
+    prov integer,
+    dpto integer,
+    codloc integer,
+    frac integer,
+    radio integer,
+    mza integer,
+    lado integer,
+    conteo bigint,
+    id serial
+);
+
+--- crea la tabla global to be deprecated
+CREATE TABLE if not exists segmentacion.adyacencias (
+    shape text,
+    prov integer,
+    dpto integer,
+    codloc integer,
+    frac integer,
+    radio integer,
+    mza integer,
+    lado integer,
+    mza_ady integer,
+    lado_ady integer,
+    tipo text
+);
+--- (!) ordenar esto: poner en otro archivo 
+--- o juntar todo en un solo archivo .sql
+
+
 
 
