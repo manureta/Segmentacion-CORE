@@ -165,9 +165,9 @@ where shape = ''' || localidad || '''
 
 
 execute '
-insert into segmentacion.adyacencias (shape, prov, dpto, codloc, frac, radio, mza, lado, mza_ady, lado_ady, tipo)
+insert into segmentacion.adyacencias
 select ''' || localidad || '''::text as shape, substr(mza_i,1,2)::integer as prov,
-    substr(mza_i,3,3)::integer as dpto,
+    substr(mza_i,3,3)::integer as depto,
     substr(mza_i,6,3)::integer as codloc,
     substr(mza_i,9,2)::integer as frac,
     substr(mza_i,11,2)::integer as radio,

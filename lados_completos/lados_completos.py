@@ -7,7 +7,7 @@ _table = sys.argv[1]
 parametro1 = _table.split('.')
 _table = parametro1[0]
 _prov = int(sys.argv[2])
-_dpto = int(sys.argv[3])
+_depto = int(sys.argv[3])
 _frac = int(sys.argv[4])
 _radio = int(sys.argv[5])
 
@@ -475,7 +475,7 @@ for prov, dpto, frac, radio in radios:
                 for cpte in segmento:
                     segmentos[cpte] = s + 1
             
-            # por ahora solo junin de los andes buscar la tabla usando una relacion prov, dpto - aglomerado
+            # por ahora solo junin de los andes buscar la tabla usando una relacion prov, depto - aglomerado
 #------
 # update _table = shapes.eAAAAa  (usando lados)
 #------

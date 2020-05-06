@@ -23,10 +23,10 @@ execute 'delete from segmentacion.conteos where tabla = ''' || localidad || ''';
 execute '
 drop table if exists "' || localidad || '".conteos;
 create table "' || localidad || '".conteos as
-with listado_sin_vacios as (
-    select
-    id, prov::integer, dpto::integer, codaglo, codloc::integer,
-    codent, frac::integer, radio::integer, mza::integer, lado::integer,
+WITH listado_sin_vacios AS (
+    SELECT
+    id, prov::integer, nom_provin, dpto::integer, nom_dpto, codaglo, codloc::integer,
+    nom_loc, codent, nom_ent, frac::integer, radio::integer, mza::integer, lado::integer,
     tipoviv
     from
     -------------------- listado --------------------------
@@ -111,7 +111,6 @@ $function$
 ;
 ----------------------------------------
 
-<<<<<<< HEAD
 --- to be deprecated
 
 create schema if not exists segmentacion;
@@ -150,6 +149,4 @@ CREATE TABLE if not exists segmentacion.adyacencias (
 
 
 
-=======
->>>>>>> master
 
