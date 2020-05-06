@@ -22,44 +22,44 @@ ejemplo:
 
 */
 
-create or replace function indec.descripcion_segmentos(aglomerado text)
+create or replace function indec.descripcion_segmentos(localidad text)
  returns integer
  language plpgsql volatile
 set client_min_messages = error
 as $function$
 
 begin
-execute 'drop view if exists "' || aglomerado || '".descripcion_segmentos;';
+execute 'drop view if exists "' || localidad || '".descripcion_segmentos;';
 
 execute '
-create view "' || aglomerado || '".descripcion_segmentos as 
+create view "' || localidad || '".descripcion_segmentos as 
 with 
 e00 as (
     select * from
     -------------------- cobertura-------------------------
-    "' || aglomerado || '".arc
+    "' || localidad || '".arc
     -------------------------------------------------------
     ),
 seg_mza_lados as (
-    select substr(mzai,1,13) || lpad(segi::text,2,''0'') as ppdddlllffrrss, 
+    select substr(mzai,1,12) as ppdddlllffrr, 
     segi as seg, substr(mzai,13,3) as mza, ladoi as lado
     from e00
     where mzai is not Null and mzai != '''' and ladoi != 0
     union
-    select substr(mzad,1,12) || lpad(segd::text,2,''0'') as ppdddlllffrr,
+    select substr(mzad,1,12) as ppdddlllffrr,
     segd as seg, substr(mzad,13,3) as mza, ladod as lado
     from e00
     where mzad is not Null and mzad != '''' and ladod != 0
     ),
 lados_por_mza as (
-  select ppdddlllffrrss, mza, count(*) as cant_lados
+  select ppdddlllffrr, mza, count(*) as cant_lados
   from seg_mza_lados
-  group by ppdddlllffrrss, mza
+  group by ppdddlllffrr, mza
   ),
 mzas_en_segmentos as (
-  select ppdddlllffrrss, mza, seg, count(*) as cant_lados_en_seg
+  select ppdddlllffrr, mza, seg, count(*) as cant_lados_en_seg
   from seg_mza_lados
-  group by ppdddlllffrrss, mza, seg
+  group by ppdddlllffrr, mza, seg
   ),
 mzas_completas as (
   select *
@@ -69,18 +69,18 @@ mzas_completas as (
   where cant_lados = cant_lados_en_seg
   ),
 lados_de_mzas_incompletas as (
-  select ppdddlllffrrss, seg, mza, lado, lado::integer as i
+  select ppdddlllffrr, seg, mza, lado, lado::integer as i
   from seg_mza_lados
-  where (ppdddlllffrrss, seg, mza) not in (
-    select ppdddlllffrrss, seg, mza
+  where (ppdddlllffrr, seg, mza) not in (
+    select ppdddlllffrr, seg, mza
     from mzas_completas
     )
   ),
 serie as (
-  select ppdddlllffrrss, seg, mza, generate_series(1, cant_lados) as i
+  select ppdddlllffrr, seg, mza, generate_series(1, cant_lados) as i
   from lados_de_mzas_incompletas
   natural join lados_por_mza
-  group by ppdddlllffrrss, seg, mza, cant_lados
+  group by ppdddlllffrr, seg, mza, cant_lados
   ),
 junta as (
   select *
@@ -89,14 +89,14 @@ junta as (
   serie   
   ),
 no_estan as (
-  select ppdddlllffrrss, seg, mza,
+  select ppdddlllffrr, seg, mza,
     max(i) as max_no_esta, min(i) as min_no_esta
   from junta
   where lado is Null
-  group by ppdddlllffrrss, seg, mza, lado
+  group by ppdddlllffrr, seg, mza, lado
   ),
 lados_ordenados as (
-  select ppdddlllffrrss, seg, mza, lado, 
+  select ppdddlllffrr, seg, mza, lado, 
   case
   when lado::integer > max_no_esta then lado::integer - max_no_esta -- el hueco está abajo
   when min_no_esta > lado::integer then cant_lados - max_no_esta + lado::integer -- el hueco está arriba
@@ -111,10 +111,10 @@ lados_ordenados as (
   natural join
   mzas_en_segmentos),
 descripcion_mza as (
-  select ppdddlllffrrss, seg, ''manzana ''||mza||'' completa'' as descripcion
+  select ppdddlllffrr, seg, ''manzana ''||mza||'' completa'' as descripcion
   from mzas_completas
   union
-  select ppdddlllffrrss, seg,
+  select ppdddlllffrr, seg,
     ''manzana ''||mza||'' ''|| replace(replace(replace(array_agg(lado order by orden)::text, ''{'',
       case
         when cardinality(array_agg(lado)) = 1 then ''lado ''
@@ -122,18 +122,18 @@ descripcion_mza as (
                                                   ), ''}'',''''), '','', '' '')
     as descripcion
   from lados_ordenados
-  group by ppdddlllffrrss, seg, mza
-  order by ppdddlllffrrss, seg, descripcion
+  group by ppdddlllffrr, seg, mza
+  order by ppdddlllffrr, seg, descripcion
   )
-select ppdddlllffrrss::character(14), 
-       substr(ppdddlllffrrss,1,2)::char(2) as prov, substr(ppdddlllffrrss,3,3)::char(3) as depto, 
-       substr(ppdddlllffrrss,6,3)::char(3) as codloc, 
-       substr(ppdddlllffrrss,9,2)::char(2) as frac, substr(ppdddlllffrrss,11,2)::char(2) as radio, 
-       lpad(seg::text,2,''0'')::character(2) as segmento, 
+select ppdddlllffrr, 
+       substr(ppdddlllffrr,1,2)::char(2) as prov, substr(ppdddlllffrr,3,3)::char(3) as depto, 
+       substr(ppdddlllffrr,6,3)::char(3) as codloc, 
+       substr(ppdddlllffrr,9,2)::char(2) as frac, substr(ppdddlllffrr,11,2)::char(2) as radio, 
+       lpad(seg::text,2,''0'') as segmento, 
     string_agg(descripcion,'', '') as descripcion
 from descripcion_mza
-group by ppdddlllffrrss, seg
-order by ppdddlllffrrss, seg
+group by ppdddlllffrr, seg
+order by ppdddlllffrr, seg
 ';
 
 return 1;
