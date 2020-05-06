@@ -9,35 +9,47 @@ autor: -h
 fecha: 2/5/2020
 
 ejemplo:
- ppdddlllffrr | prov | depto | codloc | frac | radio | segmento |                                                                                                                             descripcion                                                                                                                             
---------------+------+-------+--------+------+-------+----------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
- 380280400401 | 38   | 028   | 040    | 04   | 01    | 01       | manzana 001 completa, manzana 002 lados 3 4 1, manzana 019 completa, manzana 020 completa, manzana 021 completa
- 380280400401 | 38   | 028   | 040    | 04   | 01    | 02       | manzana 002 lado 2, manzana 003 lados 3 4, manzana 022 completa
- 380280400401 | 38   | 028   | 040    | 04   | 01    | 03       | manzana 003 lados 1 2, manzana 004 lados 3 4, manzana 006 lados 3 4
- 380280400401 | 38   | 028   | 040    | 04   | 01    | 04       | manzana 004 lados 1 2, manzana 005 lados 3 4, manzana 006 lado 1
- 380280400401 | 38   | 028   | 040    | 04   | 01    | 05       | manzana 005 lados 1 2, manzana 008 lado 4
- 380280400401 | 38   | 028   | 040    | 04   | 01    | 06       | manzana 006 lado 2, manzana 007 lados 3 4
- 380280400401 | 38   | 028   | 040    | 04   | 01    | 07       | manzana 007 lado 1, manzana 008 lados 1 2 3, manzana 009 lados 3 4, manzana 010 lado 1
- 380280400401 | 38   | 028   | 040    | 04   | 01    | 08       | manzana 007 lado 2, manzana 010 lados 3 4
-
+ ppdddlllffrr | prov | depto | codloc | frac | radio | segmento | seg |                                                                         
+                               descripcion                                                                                                      
+   
+--------------+------+-------+--------+------+-------+----------+-----+-------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------
+---
+ 380280400401 | 38   | 028   | 040    | 04   | 01    | 01       |   1 | manzana 001 completa, manzana 004 completa
+ 380280400401 | 38   | 028   | 040    | 04   | 01    | 02       |   2 | manzana 002 completa, manzana 021 completa, manzana 022 completa
+ 380280400401 | 38   | 028   | 040    | 04   | 01    | 03       |   3 | manzana 003 completa
+.
+.
+.
+ 380280400403 | 38   | 028   | 040    | 04   | 03    | 01       |   1 | manzana 001 completa, manzana 002 lados 6 7 8 9, manzana 005 lados 3 4, 
+manzana 006 completa, manzana 018 lados 2 3, manzana 901 completa, manzana 902 completa, manzana 903 completa
+ 380280400403 | 38   | 028   | 040    | 04   | 03    | 02       |   2 | manzana 002 lado 1, manzana 019 completa
+ 380280400403 | 38   | 028   | 040    | 04   | 03    | 03       |   3 | manzana 002 lados 2 3 4, manzana 003 completa, manzana 004 lados 1 2 3, 
+manzana 008 lado 4, manzana 010 lados 4 1 2
+ 380280400403 | 38   | 028   | 040    | 04   | 03    | 04       |   4 | manzana 002 lado 5, manzana 004 lado 4
+ 380280400403 | 38   | 028   | 040    | 04   | 03    | 05       |   5 | manzana 005 lados 1 2, manzana 007 lado 4
+ 380280400403 | 38   | 028   | 040    | 04   | 03    | 06       |   6 | manzana 007 lado 1, manzana 008 lados 2 3
+.
+.
+.
 */
 
-create or replace function indec.descripcion_segmentos(localidad text)
+create or replace function indec.descripcion_segmentos(aglomerado text)
  returns integer
  language plpgsql volatile
 set client_min_messages = error
 as $function$
 
 begin
-execute 'drop view if exists "' || localidad || '".descripcion_segmentos;';
+execute 'drop view if exists "' || aglomerado || '".descripcion_segmentos;';
 
 execute '
-create view "' || localidad || '".descripcion_segmentos as 
+create view "' || aglomerado || '".descripcion_segmentos as 
 with 
 e00 as (
     select * from
     -------------------- cobertura-------------------------
-    "' || localidad || '".arc
+    "' || aglomerado || '".arc
     -------------------------------------------------------
     ),
 seg_mza_lados as (
@@ -129,7 +141,7 @@ select ppdddlllffrr,
        substr(ppdddlllffrr,1,2)::char(2) as prov, substr(ppdddlllffrr,3,3)::char(3) as depto, 
        substr(ppdddlllffrr,6,3)::char(3) as codloc, 
        substr(ppdddlllffrr,9,2)::char(2) as frac, substr(ppdddlllffrr,11,2)::char(2) as radio, 
-       lpad(seg::text,2,''0'') as segmento, 
+       lpad(seg::text,2,''0'') as segmento, seg,
     string_agg(descripcion,'', '') as descripcion
 from descripcion_mza
 group by ppdddlllffrr, seg
@@ -142,8 +154,6 @@ $function$
 ;
 ----------------------------------------
 
-      
-      
 
 
 
