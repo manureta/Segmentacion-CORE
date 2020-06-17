@@ -1,33 +1,28 @@
 /*
-titulo: dividir_listado.sql
+titulo: filtrar_listado.sql
 descripción: 
-function indec.dividir_listado(aglomerado, cant_vivs)
+function indec.filtrar_listado(aglomerado, cant_vivs, metodo_de_separar, filtro)
 
-genera 2 sublistados
-uno para cada algoritmo
-aglomerado.listado_recorrido
-aglomerado.listado_lados_completos
-
-cant_viviendas usa cargar_conteos
-que usa contar_vivienda donde están definidos los códigos que cuentan
+cant_vivs crítica para decidir tipo de metodo de segmentacion
 
 autor: -h
-fecha: 2020-05
+fecha: 2020-06
 https://github.com/hernan-alperin/Segmentacion-CORE/issues/8
 */
 
-create or replace function indec.dividir_listado(aglomerado text, cant_vivs integer, metodo text)
- returns integer
+create or replace function indec.filtrar_listado(aglomerado text, cant_vivs integer, metodo_de_separar text, filtro text)
+ returns table (
+ id integer,
+ metodo_de_segmentar text -- puede ser 'lado completo' o 'recorrido'
+)  
  language plpgsql volatile
 set client_min_messages = error
 as $function$
 
 begin
-execute 'drop table if exists "' || aglomerado || '".listado_recorrido;';
-execute 'drop table if exists "' || aglomerado || '".listado_lados_completos;';
 
+return query
 execute '
-create table "' || aglomerado || '".listado_recorrido as
 with
 listado as (
     select * from "' || aglomerado || '".listado
@@ -35,35 +30,37 @@ listado as (
 conteos as (
     select * from "' || aglomerado || '".conteos
     ), 
-lados_excedidos as (
-    select *
-    from conteos
-    where conteo > ' || cant_vivs || '
-    )
+marcados as (
+    select listado.id, 
+        case 
+        when conteo > ' || cant_vivs || ' then ''recorrido''
+        else ''lado completo''
+        end as metodo_de_segmentar
+    from listado
+    join conteos
+    on listado.prov::integer = conteos.prov 
+    and listado.dpto::integer = conteos.dpto
+    and listado.codloc::integer = conteos.codloc
+    and listado.frac::integer = conteos.frac
+    and listado.radio::integer = conteos.radio
+    and listado.mza::integer = conteos.mza
+    and listado.lado::integer = conteos.lado
+)
 select * 
-from listado
-where (prov::integer, dpto::integer, codloc::integer, 
-       frac::integer, radio::integer, 
-       mza::integer, lado::integer) not in
-    (select prov, dpto, codloc, frac, radio, mza, lado 
-    from lados_excedidos)
-;
-create table "' || aglomerado || '".listado_lados_completos as
-select * from "' || aglomerado || '".listado
-except
-select * from "' || aglomerado || '".listado_recorrido
-;'
-;
-
-return 1;
+from marcados
+;';
 end;
 $function$
 ;
 
 
--- ejemplo select indec.dividir_listado('e0029', 40, '');
--- el parámetro metodo se va a usar para excluir las manzanas enteras
+-- ejemplo select indec.filtrar_listado('e0029', 40, '', '');
+-- el parámetro metodo_de_separar se va a usar para excluir más adelante 
+-- manzanas enteras
 -- que contengan esos lados y balancear mejor la sobrecarga
-
+-- por ejemplo si un lado supera la cantidad crítica
+-- 
+-- el parámetro filtro se usa para elegir si devuelve filtrado o todo con el campo
+-- metodo_de_segmentar
 
 
