@@ -23,21 +23,13 @@ begin
 
 return query
 execute '
-with
-listado as (
-    select * from "' || aglomerado || '".listado
-    ),
-conteos as (
-    select * from "' || aglomerado || '".conteos
-    ), 
-marcados as (
     select listado.id, 
         case 
         when conteo > ' || cant_vivs || ' then ''recorrido''
         else ''lado completo''
         end as metodo_de_segmentar
-    from listado
-    join conteos
+    from "' || aglomerado || '".listado
+    join "' || aglomerado || '".conteos
     on listado.prov::integer = conteos.prov 
     and listado.dpto::integer = conteos.dpto
     and listado.codloc::integer = conteos.codloc
@@ -45,9 +37,6 @@ marcados as (
     and listado.radio::integer = conteos.radio
     and listado.mza::integer = conteos.mza
     and listado.lado::integer = conteos.lado
-)
-select * 
-from marcados
 ;';
 end;
 $function$
