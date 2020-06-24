@@ -379,7 +379,7 @@ for prov, dpto, frac, radio in radios:
             start = time.time()
 
             # crea los dictionary
-            componentes_en_adyacencias = list(set([cpte for cpte, cpte_ady in adyacencias]))
+            componentes_en_adyacencias = list(set([cpte for cpte, cpte_ady in adyacencias]).union(set([cpte for cpte_ady, cpte in adyacencias])))
             todos_los_componentes = list(set(componentes + componentes_en_adyacencias))
 
             viviendas = dict()
