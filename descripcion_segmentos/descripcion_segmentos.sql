@@ -137,7 +137,7 @@ descripcion_mza as (
   group by ppdddlllffrr, seg, mza
   order by ppdddlllffrr, seg, descripcion
   )
-select ppdddlllffrr, 
+select ppdddlllffrr || lpad(seg::text,2,''0'') as link, 
        substr(ppdddlllffrr,1,2)::char(2) as prov, substr(ppdddlllffrr,3,3)::char(3) as depto, 
        substr(ppdddlllffrr,6,3)::char(3) as codloc, 
        substr(ppdddlllffrr,9,2)::char(2) as frac, substr(ppdddlllffrr,11,2)::char(2) as radio, 
