@@ -131,7 +131,7 @@ descripcion_mza as (
       case
         when cardinality(array_agg(lado)) = 1 then ''lado ''
         else ''lados '' end
-                                                  ), ''}'',''''), '','', '' '')
+                                                  ), ''}'',''''), '','', '', '')
     as descripcion
   from lados_ordenados
   group by ppdddlllffrr, seg, mza
@@ -142,7 +142,7 @@ select ppdddlllffrr || lpad(seg::text,2,''0'') as link,
        substr(ppdddlllffrr,6,3)::char(3) as codloc, 
        substr(ppdddlllffrr,9,2)::char(2) as frac, substr(ppdddlllffrr,11,2)::char(2) as radio, 
        lpad(seg::text,2,''0'') as segmento, seg,
-    string_agg(descripcion,'', '') as descripcion
+    string_agg(descripcion,''; '') as descripcion
 from descripcion_mza
 group by ppdddlllffrr, seg
 order by ppdddlllffrr, seg
