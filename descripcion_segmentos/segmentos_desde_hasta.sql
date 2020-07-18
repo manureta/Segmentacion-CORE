@@ -1,7 +1,7 @@
 /*
 titulo: segmentos_desde_hasta.sql
 descripción: 
-desde y hasta qué registro del listado spanea el segmento
+desde y hasta qué registro del listado spanea el segmento por lado de manzana
 ademas de informar si el lado está completamente incluido en el segmento
 proceso posterior a la segmentación por manzana completa
 necesario para generar la descripcion de cada segmento
@@ -28,7 +28,7 @@ ejemplo:
  02   | 014  | 010    | 02   | 03    |         105 | 0024 | 003  |           1601 |           1606 | f
  02   | 014  | 010    | 02   | 03    |         106 | 0024 | 002  |           1583 |           1584 | f
  02   | 014  | 010    | 02   | 03    |         106 | 0024 | 003  |           1607 |           1623 | f
- 02   | 014  | 010    | 02   | 03    |         107 | 0024 | 002  |           1585 |           1589 | f
+ 02   | 014  |: 010    | 02   | 03    |         107 | 0024 | 002  |           1585 |           1589 | f
  02   | 014  | 010    | 02   | 03    |         107 | 0024 | 003  |           1624 |           1625 | f
  02   | 014  | 010    | 02   | 03    |         107 | 0024 | 004  |           1626 |           1635 | t
  02   | 014  | 010    | 02   | 03    |         107 | 0024 | 005  |           1636 |           1636 | t
