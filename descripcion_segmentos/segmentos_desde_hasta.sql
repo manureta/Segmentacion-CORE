@@ -11,6 +11,23 @@ fecha: 18/7/2020
 
 ejemplo:
 ...
+ 02   | 014  | 010    | 02   | 03    | 0023 | 001  |          67 |              1 |             35 | f
+ 02   | 014  | 010    | 02   | 03    | 0023 | 001  |          68 |             36 |             70 | f
+ 02   | 014  | 010    | 02   | 03    | 0023 | 001  |          69 |             71 |             72 | f
+ 02   | 014  | 010    | 02   | 03    | 0023 | 002  |          69 |             73 |             73 | t
+ 02   | 014  | 010    | 02   | 03    | 0023 | 003  |          69 |             74 |            104 | f
+ 02   | 014  | 010    | 02   | 03    | 0023 | 003  |          70 |            105 |            139 | f
+ 02   | 014  | 010    | 02   | 03    | 0023 | 003  |          71 |            140 |            173 | f
+ 02   | 014  | 010    | 02   | 03    | 0023 | 003  |          72 |            174 |            208 | f
+ 02   | 014  | 010    | 02   | 03    | 0023 | 003  |          73 |            209 |            210 | f
+ 02   | 014  | 010    | 02   | 03    | 0023 | 004  |          73 |            211 |            211 | t
+ 02   | 014  | 010    | 02   | 03    | 0023 | 005  |          73 |            212 |            242 | t
+ 02   | 014  | 010    | 02   | 03    | 0024 | 001  |          74 |              1 |              1 | t
+ 02   | 014  | 010    | 02   | 03    | 0024 | 002  |          74 |              2 |             20 | t
+ 02   | 014  | 010    | 02   | 03    | 0024 | 003  |          74 |             21 |             28 | f
+ 02   | 014  | 010    | 02   | 03    | 0024 | 003  |          75 |             29 |             45 | f
+ 02   | 014  | 010    | 02   | 03    | 0024 | 004  |          75 |             46 |             55 | t
+ 02   | 014  | 010    | 02   | 03    | 0024 | 005  |          75 |             56 |             56 | t
 ...
 */
 
@@ -32,7 +49,7 @@ segmentacion as ( select * from "' || aglomerado || '".segmentacion),
 lados_desde_hasta as (
 -- desde hasta por lado
 select prov, dpto, codloc, frac, radio, mza, lado,
-  min(listado.orden_reco) as lado_desde, max(listado.orden_reco) as lado_hasta
+  min(listado.orden_reco::integer) as lado_desde, max(listado.orden_reco::integer) as lado_hasta
 from listado
 group by prov, dpto, codloc, frac, radio, mza, lado
 order by prov, dpto, codloc, frac, radio, mza, lado
@@ -40,8 +57,8 @@ order by prov, dpto, codloc, frac, radio, mza, lado
 )
 -- desde hasta lado por segmento
 select prov, dpto, codloc, frac, radio, mza, lado, segmento_id,
-  min(listado.orden_reco) as seg_lado_desde, max(listado.orden_reco) as seg_lado_hasta,
-  (min(listado.orden_reco) = lado_desde and max(listado.orden_reco) = lado_hasta) as completo
+  min(listado.orden_reco::integer) as seg_lado_desde, max(listado.orden_reco::integer) as seg_lado_hasta,
+  (min(listado.orden_reco::integer) = lado_desde and max(listado.orden_reco::integer) = lado_hasta) as completo
 from listado
 join segmentacion
 on listado.id = listado_id
