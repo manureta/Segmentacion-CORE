@@ -31,20 +31,20 @@ ejemplo:
 ...
 */
 
-create or replace function indec.segmentos_desde_hasta(aglomerado text)
+create or replace function indec.segmentos_desde_hasta(esquema text)
  returns integer
  language plpgsql volatile
 set client_min_messages = error
 as $function$
 
 begin
-execute 'drop table if exists "' || aglomerado || '".segmentos_desde_hasta;';
+execute 'drop table if exists "' || esquema || '".segmentos_desde_hasta;';
 
 execute '
-create table "' || aglomerado || '".segmentos_desde_hasta as 
+create table "' || esquema || '".segmentos_desde_hasta as 
 with 
-listado as ( select * from "' || aglomerado || '".listado),
-segmentacion as ( select * from "' || aglomerado || '".segmentacion),
+listado as ( select * from "' || esquema || '".listado),
+segmentacion as ( select * from "' || esquema || '".segmentacion),
 
 lados_desde_hasta as (
 -- desde hasta por lado
