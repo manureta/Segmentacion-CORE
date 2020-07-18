@@ -30,7 +30,7 @@ listado as (select * from "' || aglomerado || '".listado),
 listado_sin_nulos as (
     select id, prov, dpto, codloc, frac, radio, mza, lado, nrocatastr,
     coalesce(sector,'''') sector, coalesce(edificio,'''') edificio, coalesce(entrada,'''') entrada,
-     piso, orden_reco
+     piso, orden_reco::integer
     from listado
     ),
 
@@ -54,7 +54,7 @@ deseado_manzana as (
 pisos_enteros as (
     select prov, dpto, codloc, frac, radio, mza, lado, 
         nrocatastr, sector, edificio, entrada,
-        piso, min(orden_reco) as piso_id
+        piso, min(orden_reco::integer) as piso_id
     from listado_sin_nulos
     group by prov, dpto, codloc, frac, radio, mza, lado,
         nrocatastr, sector, edificio, entrada, piso
@@ -62,19 +62,19 @@ pisos_enteros as (
 pisos_abiertos as (
     select id, prov, dpto, codloc, frac, radio, mza, lado, 
         nrocatastr, sector, edificio, entrada, piso,
-        orden_reco, piso_id,
+        orden_reco::integer, piso_id,
         row_number() over w as row, rank() over w as rank
     from pisos_enteros
     natural join listado_sin_nulos
     window w as (
         partition by prov, dpto, codloc, frac, radio, mza
-        order by orden_reco
+        order by orden_reco::integer
         )
     ),
 
 segmento_id_en_mza as (
     select id, prov, dpto, codloc, frac, radio, mza, lado, 
-        nrocatastr, sector, edificio, entrada, piso, orden_reco,
+        nrocatastr, sector, edificio, entrada, piso, orden_reco::integer,
         floor((rank - 1)*segs_x_mza/vivs) + 1 as sgm_mza, rank
     from deseado_manzana
     join pisos_abiertos
