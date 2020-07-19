@@ -9,7 +9,7 @@ create or replace function indec.descripcion (d record) returns text AS
 $function$
 begin
 --return '|'|| d.nrocatastr || '|';
-return d.ccalle || ' - ' || d.ncalle ||  
+return d.ccalle || ' - ' || d.ncalle || ' ' || 
   case 
     when substr(d.ccalle, 1, 4)::integer = 999 then ''
     when d.nrocatastr = '0' then ' S/N '
