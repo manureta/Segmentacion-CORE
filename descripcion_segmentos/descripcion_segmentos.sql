@@ -66,7 +66,7 @@ viviendas_colectivas as (
   prov || dpto || codloc || frac || radio as ppdddlllffrr,
   mza, lado::integer, 
   ccalle, ncalle, -- decidir si se pone o no 
-  nro_catast, nrocatastr, descripcio, descripci2 
+  nrocatastr, descripcio, descripci2 
   from listado 
   where tipoviv = ''CO''
   ),
