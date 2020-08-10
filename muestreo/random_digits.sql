@@ -23,12 +23,13 @@ order by prov, dpto, codloc
 ;
 */
 
-/*
+drop view e0002.numeros_modulo10_por_loc_50k;
+create view e0002.numeros_modulo10_por_loc_50k as
 select prov, dpto, codloc, indec.randint(10)
 from e0002.listado
 group by prov, dpto, codloc
 order by prov, dpto, codloc
-*/
+;
 
 drop view e0002.listado_segmentado;
 create view e0002.listado_segmentado as
@@ -40,6 +41,18 @@ on listado.id = listado_id
 order by prov||dpto||codloc||frac||radio||mza||lado, orden_reco::integer
 ;
 
-select * from e0002.listado_segmentado;
+select prov, dpto, codloc, frac, radio, mza, 
+  segmento_id, randint, 
+  case when segmento_id % 10 = randint then true
+  else Null
+  end
+  as muestra 
+from e0002.segmentacion
+join e0002.listado
+on listado_id = listado.id
+join e0002.numeros_modulo10_por_loc_50k
+using (prov, dpto, codloc)
+order by prov, dpto, codloc, frac, radio, mza, segmento_id, randint
+;
 
 
