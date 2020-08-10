@@ -33,14 +33,15 @@ order by prov, dpto, codloc
 
 drop view e0002.listado_segmentado;
 create view e0002.listado_segmentado as
-select id, prov||dpto||codloc||frac||radio||mza||lado as clado, ccalle, ncalle, 
+select id, prov, dpto, codloc, frac, radio, mza, lado as clado, ccalle, ncalle, 
   nrocatastr, sector, edificio, entrada, orden_reco, piso, dpto_habit, segmento_id as s_id
 from e0002.listado
 join e0002.segmentacion
 on listado.id = listado_id
-order by prov||dpto||codloc||frac||radio||mza||lado, orden_reco::integer
+order by prov, dpto, codloc, frac, radio, mza, lado, orden_reco::integer
 ;
 
+create view e0002.segmento_digito_muestral as
 select prov, dpto, codloc, frac, radio, mza, 
   segmento_id, randint, 
   case when segmento_id % 10 = randint then true
@@ -54,5 +55,20 @@ join e0002.numeros_modulo10_por_loc_50k
 using (prov, dpto, codloc)
 order by prov, dpto, codloc, frac, radio, mza, segmento_id, randint
 ;
+
+
+---- numeración de segmentos por fraccion y radio
+with segmentos as (
+  select prov, dpto, codloc, frac, radio, s_id
+  from e0002.listado_segmentado
+  group by prov, dpto, codloc, frac, radio, s_id
+  )
+SELECT prov, dpto, codloc, frac, radio, s_id,
+  rank() OVER (partition by prov, dpto, codloc, frac, radio order by prov, dpto, codloc, frac, radio, s_id) as s_radio,
+  rank() OVER (partition by prov, dpto, codloc, frac order by prov, dpto, codloc, frac, radio, s_id) as s_fracion
+FROM segmentos
+;
+
+
 
 
