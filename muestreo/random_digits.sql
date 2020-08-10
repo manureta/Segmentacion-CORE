@@ -32,11 +32,12 @@ order by prov, dpto, codloc
 
 drop view e0002.listado_segmentado;
 create view e0002.listado_segmentado as
-select id, prov, dpto, codloc, frac, radio, mza, lado, ccalle, ncalle, nrocatastr, piso, sector, edificio, entrada, segmento_id
+select id, prov||dpto||codloc||frac||radio||mza||lado as clado, ccalle, ncalle, 
+  nrocatastr, sector, edificio, entrada, orden_reco, piso, dpto_habit, segmento_id as s_id
 from e0002.listado
 join e0002.segmentacion
 on listado.id = listado_id
-order by id
+order by prov||dpto||codloc||frac||radio||mza||lado, orden_reco::integer
 ;
 
 select * from e0002.listado_segmentado;
