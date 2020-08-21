@@ -4,6 +4,7 @@
                                                                                                                                                                           insumos                                                                                                                                                                   listado (C1),                                                                                                                                                           segmentación a mza indep (no requiere cobertura)
   productos                                                                                                                                                                 n_s_radio: numeración de segmentos por radio                                                                                                                            n_s_fraccion: numeración de segmentos por fraccion                                                                                                                      muestrado: True si segmento muestrado,                                                                                                                                              Null si no                                                                                                                                              --------------------------------------------------
 */
+drop view numeracion_seg_cfr cascade;
 create view numeracion_seg_cfr as
 with
 pdlfrmls as (
