@@ -4,6 +4,7 @@
                                                                                                                                                                           insumos                                                                                                                                                                   listado (C1),                                                                                                                                                           segmentación a mza indep (no requiere cobertura)
   productos                                                                                                                                                                 n_s_radio: numeración de segmentos por radio                                                                                                                            n_s_fraccion: numeración de segmentos por fraccion                                                                                                                      muestrado: True si segmento muestrado,                                                                                                                                              Null si no                                                                                                                                              --------------------------------------------------
 */
+create view numeracion_seg_cfr as
 with
 pdlfrmls as (
   select prov, dpto, codloc, frac, radio, mza, lado, segmento_id as s_id
@@ -43,6 +44,8 @@ from muestra
 join numerados
 using (prov, dpto, codloc)
 ;
+
+select * from numeracion_seg_cfr;
 
 /*
 en el siguente caso el número aleatorio usado 
