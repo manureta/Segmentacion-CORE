@@ -38,7 +38,7 @@ set client_min_messages = error
 as $function$
 
 begin
-execute 'drop table if exists "' || esquema || '".segmentos_desde_hasta;';
+execute 'drop table if exists "' || esquema || '".segmentos_desde_hasta cascade;';
 
 execute '
 create table "' || esquema || '".segmentos_desde_hasta as 
@@ -69,7 +69,7 @@ order by prov, dpto, codloc, frac, radio, mza, lado, segmento_id
 ;
 ';
 
-execute 'drop table if exists "' || esquema || '".segmentos_desde_hasta_ids;';
+execute 'drop table if exists "' || esquema || '".segmentos_desde_hasta_ids cascade;';
 execute '
 create table "' || esquema || '".segmentos_desde_hasta_ids as
 with                                                                                                                                                                    listado as ( select * from "' || esquema || '".listado)

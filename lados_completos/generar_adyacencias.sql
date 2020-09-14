@@ -11,7 +11,7 @@ AS $function$
 
 begin
 
-execute 'drop table if exists "' || aglomerado || '".lados_adyacentes;';
+execute 'drop table if exists "' || aglomerado || '".lados_adyacentes cascade;';
 
 execute '
 create table "' || aglomerado || '".lados_adyacentes as 

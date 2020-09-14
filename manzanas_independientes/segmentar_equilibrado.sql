@@ -20,7 +20,7 @@ indec.segmentar_equilibrado(aglomerado text, deseado integer)
 as $function$
 
 begin
-execute 'drop table if exists "' || aglomerado || '".segmentacion;';
+execute 'drop table if exists "' || aglomerado || '".segmentacion cascade;';
 execute '
 create table "' || aglomerado || '".segmentacion as
 with 

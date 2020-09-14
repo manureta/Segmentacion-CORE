@@ -45,8 +45,8 @@ set client_min_messages = error
 as $function$
 
 begin
---execute 'drop table if exists "' || aglomerado || '".descripcion_segmentos;';
-execute 'drop view if exists "' || aglomerado || '".descripcion_segmentos;';
+--execute 'drop table if exists "' || aglomerado || '".descripcion_segmentos cascade;';
+execute 'drop view if exists "' || aglomerado || '".descripcion_segmentos cascade;';
 
 execute '
 create view "' || aglomerado || '".descripcion_segmentos as 
