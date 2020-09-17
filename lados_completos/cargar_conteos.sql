@@ -17,7 +17,7 @@ set client_min_messages = error
 as $function$
 
 begin
-execute 'drop table if exists "' || aglomerado || '".conteos;';
+execute 'drop table if exists "' || aglomerado || '".conteos cascade;';
 execute 'delete from segmentacion.conteos where tabla = ''' || aglomerado || ''';';
 
 execute '

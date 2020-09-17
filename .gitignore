@@ -135,3 +135,7 @@ data/
 # vi swaps
 .*.sw*
 
+#mis notas
+notas.sql
+
+#the local changes of this file
