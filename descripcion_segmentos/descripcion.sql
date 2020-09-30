@@ -12,6 +12,7 @@ begin
 return d.ccalle || ' - ' || d.ncalle || ' ' || 
   case 
     when substr(d.ccalle, 1, 4)::integer = 999 then ''
+    when d.nrocatastr is Null then ' S/N '
     when d.nrocatastr = '0' then ' S/N '
     else d.nrocatastr || ' piso ' || d.piso
   end;
