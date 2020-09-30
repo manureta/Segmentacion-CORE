@@ -8,6 +8,11 @@ cant_vivs crítica para decidir tipo de metodo de segmentacion
 autor: -h
 fecha: 2020-06
 https://github.com/hernan-alperin/Segmentacion-CORE/issues/8
+
+metodo_de_separar
+1: lados excedidos se excluyen de lados completos (se separa recorrido de manzanan independiente parcial)
+2: manzanas con al menos un lado excedido se segmentan como manzana independiente
+3: 
 */
 
 create or replace function indec.filtrar_listado(aglomerado text, cant_vivs integer, metodo_de_separar text, filtro text)
