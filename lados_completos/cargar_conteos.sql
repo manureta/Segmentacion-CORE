@@ -36,8 +36,8 @@ with listado_sin_vacios as (
     and mza !~* ''[a-z]''
     ),
     e00 as (
-    select codigo10, nomencla, codigo20, ancho, anchomed, tipo, nombre, ladoi, ladod, desdei, desded, hastai, hastad, mzai, mzad,
-    codloc20, nomencla10, nomenclai, nomenclad, wkb_geometry,
+    select codigo10, codigo20, ancho, anchomed, tipo, nombre, ladoi, ladod, desdei, desded, hastai, hastad, mzai, mzad,
+    codloc20, wkb_geometry,
     -------------------- nombre de covertura y tabla de shape
     ''' || aglomerado || '.arc''::text as cover
     from "' || aglomerado || '".arc
