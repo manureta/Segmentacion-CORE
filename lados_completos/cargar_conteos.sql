@@ -10,6 +10,7 @@ autor: -h+M
 fecha: 2020-01
 */
 
+drop function if exists indec.cargar_conteos(aglomerado text);
 create or replace function indec.cargar_conteos(esquema text)
  returns integer
  language plpgsql volatile
