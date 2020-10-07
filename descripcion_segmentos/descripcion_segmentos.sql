@@ -167,10 +167,10 @@ descripciones_mzas as (
   from mzas_completas
   union
   select ppdddlllffrr, seg,
-    ''manzana ''||mza||'' ''|| replace(replace(replace(array_agg(descripcion_lado order by orden)::text, ''{'',
+    ''Manzana ''||mza||'' ''|| replace(replace(replace(array_agg(descripcion_lado order by orden)::text, ''{'',
       case
-        when cardinality(array_agg(lado)) = 1 then ''lado ''
-        else ''lados '' end
+        when cardinality(array_agg(lado)) = 1 then ''Lado ''
+        else ''Lados '' end
                                                       ), 
                                               -- cambia inicio de array por lado o lados según cuantos son
                                     ''}'',''''), -- saca fin de array }
