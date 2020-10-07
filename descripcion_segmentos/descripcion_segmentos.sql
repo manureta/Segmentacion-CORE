@@ -163,7 +163,7 @@ descripciones_lados as (
 --  and case co.lado = l.lado end
   ),
 descripciones_mzas as (
-  select ppdddlllffrr, seg, ''manzana ''||mza||'' completa'' as descripcion
+  select ppdddlllffrr, seg, ''Manzana ''||mza||'' completa'' as descripcion
   from mzas_completas
   union
   select ppdddlllffrr, seg,
