@@ -22,7 +22,7 @@ execute '
 create table "' || esquema || '".lados as 
 with 
   de_listado as (
-    select prov::integer as prov, dpto::integer as dpto, codloc::integer as codloc,
+    select distinct prov::integer as prov, dpto::integer as dpto, codloc::integer as codloc,
       frac::integer as frac, radio::integer as radio, 
       mza::integer as mza, lado::integer as lado,
       ccalle::integer, ncalle::text
