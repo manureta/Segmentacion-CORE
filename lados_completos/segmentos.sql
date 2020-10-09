@@ -50,16 +50,17 @@ select ---lados_completos_id serial,
 --prov, dpto, codloc, frac, radio, 
 substr(ppdddcccffrrmmmll,1,12) as ppdddcccffrr,
 nro_segmento_en_radio,
-array_agg(substr(ppdddcccffrrmmmll,13,5)) as mmmll
+--array_agg(substr(ppdddcccffrrmmmll,13,5)) as mmmll
+substr(ppdddcccffrrmmmll,13,3)::integer as mza,
+substr(ppdddcccffrrmmmll,16,2)::integer as lado
 from de_e00
-group by 
+order by 
 --prov, dpto, codloc, frac, radio, nro_segmento_en_radio
-substr(ppdddcccffrrmmmll,1,12), nro_segmento_en_radio
+substr(ppdddcccffrrmmmll,1,12), nro_segmento_en_radio, mza, lado
 ;
 
 
 select * 
 from e0359.v_segmentos_lados_completos
-order by nro_segmento_en_radio
 ;
 
