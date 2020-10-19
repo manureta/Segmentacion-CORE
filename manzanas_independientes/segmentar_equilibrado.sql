@@ -23,9 +23,7 @@ begin
 execute 'DROP sequence IF EXISTS "' || aglomerado || '".segmentos_seq CASCADE';
 execute 'create sequence "' || aglomerado || '".segmentos_seq';
 
-execute 'drop table if exists "' || aglomerado || '".segmentacion cascade;';
 execute '
-create table "' || aglomerado || '".segmentacion as
 with 
 parametros as (
     select ' || deseado || '::float as deseado),
@@ -92,10 +90,13 @@ segmentos_id as (
     from segmento_id_en_mza
     group by dpto, frac, radio, mza, sgm_mza
     )
-select id as listado_id, segmento_id
-from segmentos_id
+
+update "' || aglomerado || '".segmentacion sgm
+set segmento_id = j.segmento_id
+from (segmentos_id
 join segmento_id_en_mza
-using (dpto, frac, radio, mza, sgm_mza)
+using (dpto, frac, radio, mza, sgm_mza)) j
+where listado_id = j.id
 ';
 return 1;
 end;
