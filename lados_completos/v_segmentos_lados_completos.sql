@@ -42,7 +42,7 @@ with de_e00 as (
     where segd is not Null
   )
 select ---lados_completos_id serial,
---prov, dpto, codloc, frac, radio, 
+prov, dpto, codloc, frac, radio, 
 substr(ppdddcccffrrmmmll,1,12) as ppdddcccffrr,
 nro_segmento_en_radio,
 --array_agg(substr(ppdddcccffrrmmmll,13,5)) as mmmll
