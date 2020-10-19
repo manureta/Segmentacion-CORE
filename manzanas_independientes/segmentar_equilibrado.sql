@@ -20,6 +20,9 @@ indec.segmentar_equilibrado(aglomerado text, deseado integer)
 as $function$
 
 begin
+execute 'DROP sequence IF EXISTS "' || aglomerado || '".segmentos_seq CASCADE';
+execute 'create sequence "' || aglomerado || '".segmentos_seq';
+
 execute 'drop table if exists "' || aglomerado || '".segmentacion cascade;';
 execute '
 create table "' || aglomerado || '".segmentacion as
@@ -81,8 +84,10 @@ segmento_id_en_mza as (
     using (prov, dpto, codloc, frac, radio, mza)
     ),
 segmentos_id as (
-    select row_number() 
-        over (order by dpto, frac, radio, mza, sgm_mza) as segmento_id,
+    select 
+        -- row_number() over (order by dpto, frac, radio, mza, sgm_mza) 
+        nextval(''"' || aglomerado || '".segmentos_seq'')
+        as segmento_id,
         dpto, frac, radio, mza, sgm_mza
     from segmento_id_en_mza
     group by dpto, frac, radio, mza, sgm_mza
