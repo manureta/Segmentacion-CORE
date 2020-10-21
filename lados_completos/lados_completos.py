@@ -331,11 +331,11 @@ for prov, dpto, frac, radio in radios:
 
 
         conteos_excedidos = [(manzana, conteo) for (manzana, conteo) in conteos_mzas
-                            if conteo > cantidad_de_viviendas_permitida_para_romper_manzana]
+                            if conteo > cantidad_de_viviendas_maxima_deseada_por_segmento]
         mzas_excedidas = [mza for mza, conteo in conteos_excedidos]
         
         lados_excedidos = [(mza, lado) for ((mza, lado), conteo) in conteos_lados
-                            if conteo > cantidad_de_viviendas_permitida_para_romper_manzana]
+                            if conteo > cantidad_de_viviendas_maxima_deseada_por_segmento]
 
         print ('manzanas a partir:', mzas_excedidas)
         print ('lados excedidos:', lados_excedidos)
