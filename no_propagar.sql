@@ -21,8 +21,8 @@ begin
 return query
 execute '
 select prov, dpto, codloc, frac, radio, mza, lado 
-from "' || aglomerado || '".v_segmentos_lados_completos
-where vivis > umbral
+from "' || esquema || '".v_segmentos_lados_completos
+where vivs > ' || umbral || '
 ;';
 end;
 $function$
