@@ -30,4 +30,14 @@ order by ppdddcccffrr, nro_segmento_en_radio
 ;
 
 
+select distinct mza, lado,mza, lado,  segmento_id
+from e0002.segmentacion
+join e0002.listado
+on listado.id = listado_id
+where frac::integer = 9 
+and radio::integer = 2
+;
+
+
+
 
