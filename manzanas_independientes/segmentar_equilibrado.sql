@@ -20,8 +20,10 @@ indec.segmentar_equilibrado(aglomerado text, deseado integer)
 as $function$
 
 begin
-execute 'DROP sequence IF EXISTS "' || aglomerado || '".segmentos_seq CASCADE';
-execute 'create sequence "' || aglomerado || '".segmentos_seq';
+-- esto debe ejecutarse una única vez
+--execute 'DROP sequence IF EXISTS "' || aglomerado || '".segmentos_seq CASCADE';
+--execute 'create sequence "' || aglomerado || '".segmentos_seq';
+---------------------------
 
 execute '
 with 
