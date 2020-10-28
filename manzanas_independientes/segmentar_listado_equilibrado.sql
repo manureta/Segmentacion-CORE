@@ -104,4 +104,53 @@ $function$
 
 
 
+create or replace function
+indec.select_manzana_independiente_ffrrmmm(esquema text, frac integer, radio integer, mza text, deseado integer)
+    returns text
+    language sql 
+as $function$
+select '
+select indec.segmentar_listado_equilibrado(
+    "' || esquema || '", 
+    ''select * 
+        from "' || esquema || '".listado 
+        where frac::integer = ' || frac || ' and radio::integer = ' || radio || ' and mza = ' || mza || ';'', 
+    ''lado::integer, orden_reco::integer'' , 
+    ' || deseado || ')
+';
+$function$
+;
+
+
+DROP FUNCTION indec.segmentar_manzana_independiente_ffrrmmm(text,integer,integer,text,integer);
+create or replace function indec.segmentar_manzana_independiente_ffrrmmm(esquema text, frac integer, radio integer, mza text, deseado integer)
+    returns text
+    language plpgsql volatile
+    set client_min_messages = error
+as $function$
+declare 
+sql text;
+begin
+sql = '
+select indec.segmentar_listado_equilibrado(
+    "' || esquema || '",
+    ''select *
+        from "' || esquema || '".listado
+        where frac::integer = ' || frac || ' and radio::integer = ' || radio || ' and mza = ' || mza || ';'',
+    ''lado::integer, orden_reco::integer'' ,
+    ' || deseado || ')
+';
+
+execute sql;
+
+return sql;
+
+end;
+$function$
+;
+
+
+
+
+
 
