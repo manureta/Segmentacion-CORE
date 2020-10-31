@@ -16,12 +16,12 @@ as $function$
 select
 $1 is not Null 
 and $1 != ''
-and substr($1,1,2) = $2 -- PP = prov
-and substr($1,3,3) = $3 -- DDD = dpto
-and substr($1,6,3) = $4 -- CCC = codloc
-and substr($1,9,3) = $5 -- FF = frac
-and substr($1,11,2) = $6 -- RR = radio
-and substr($1,13,3) = $7 -- MMM = mza
+and substr($1,1,2)::integer = $2 -- PP = prov
+and substr($1,3,3)::integer = $3 -- DDD = dpto
+and substr($1,6,3)::integer = $4 -- CCC = codloc
+and substr($1,9,3)::integer = $5 -- FF = frac
+and substr($1,11,2)::integer = $6 -- RR = radio
+and substr($1,13,3)::integer = $7 -- MMM = mza
 $function$
 ;
 
