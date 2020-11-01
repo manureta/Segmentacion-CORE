@@ -16,10 +16,11 @@ as $function$
 select
 $1 is not Null 
 and $1 != ''
+and $1 ~ '^[0-9]' -- es numérico
 and substr($1,1,2)::integer = $2 -- PP = prov
 and substr($1,3,3)::integer = $3 -- DDD = dpto
 and substr($1,6,3)::integer = $4 -- CCC = codloc
-and substr($1,9,3)::integer = $5 -- FF = frac
+and substr($1,9,2)::integer = $5 -- FF = frac
 and substr($1,11,2)::integer = $6 -- RR = radio
 and substr($1,13,3)::integer = $7 -- MMM = mza
 $function$
@@ -28,11 +29,15 @@ $function$
 
 -- Unit tests
 
-select indec.join_ppdddcccffrrmmm(Null,1,2,3,4,5,6) = False;
-select indec.join_ppdddcccffrrmmm('',1,2,3,4,5,6) = False;
-select indec.join_ppdddcccffrrmmm('123456789012345',1,2,3,4,5,6) = False;
-select indec.join_ppdddcccffrrmmm('123456789012345',12,345,678,90,12,345) = True;
-select indec.join_ppdddcccffrrmmm('112223334455666',11,222,333,44,55,666) = True;
+select indec.join_ppdddcccffrrmmm(Null,1,2,3,4,5,6) = False as test_null;
+select indec.join_ppdddcccffrrmmm('',1,2,3,4,5,6) = False as test_empty;
+select indec.join_ppdddcccffrrmmm('a',1,2,3,4,5,6) = False as test_no_numeric; -- safe
+select indec.join_ppdddcccffrrmmm('123456789012345',1,2,3,4,5,6) = False as test_no_match;
+select indec.join_ppdddcccffrrmmm('123456789012345',12,345,678,90,12,345) = True as test_match_arbage_anyway;
+select indec.join_ppdddcccffrrmmm('112223334455666',11,222,333,44,55,666) = True as test_match;
 
 
+-- (?) definir qué deben hacer los siguientes tests
+select indec.join_ppdddcccffrrmmm('123456789012',12,345,678,90,12,345) = False as test_no_match_shorter;  
+select indec.join_ppdddcccffrrmmm('12345678901234567',12,345,678,90,12,345) = False as test_no_match_longer;
 
