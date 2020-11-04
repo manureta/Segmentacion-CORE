@@ -41,19 +41,21 @@ order by  segmento_id
 
 
 select 
-frac, radio, mza, lado, ccalle, ncalle, nrocatastr, piso,
-orden_reco::integer as orden_reco
+frac, radio, mza, lado, ccalle, ncalle, nrocatastr, piso, dpto_habit,
+orden_rec2::integer as orden_reco
 from e0002.listado
 order by frac, radio, mza, lado, 
-orden_reco 
+orden_rec2 
 ;
+
+
 
 
 
 select 
 frac, radio, mza, lado, ccalle, ncalle, nrocatastr, piso,
 orden_rec2::integer as orden_reco
-from e0005.listado
+from e0002.listado
 where orden_rec2 != ''
 order by frac, radio, mza, lado, 
 orden_rec2::integer 
