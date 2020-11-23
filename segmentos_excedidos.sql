@@ -28,4 +28,27 @@ end;
 $function$
 ;
 
+create or replace function
+indec.segmentos_excedidos_ffrr(esquema text, ff integer, rr integer, umbral integer)
+    returns table (segmento_id bigint)
+    language plpgsql volatile
+    set client_min_messages = error
+as $function$
+
+begin
+
+return query
+execute '
+select segmento_id
+from "' || esquema || '".listado
+join "' || esquema || '".segmentacion
+on listado_id = listado.id
+where frac::integer = ' || ff || ' and radio::integer = ' || rr || '
+group by segmento_id
+having count(*) > ' || umbral || '
+;';
+end;
+$function$
+;
+
 
