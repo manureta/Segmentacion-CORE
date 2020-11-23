@@ -10,6 +10,8 @@ autor: -h
 fecha: 18/7/2020
 
 ejemplo:
+ prov | dpto | codloc | frac | radio | mza  | lado | segmento_id | seg_lado_desde | seg_lado_hasta | completo
+------+------+--------+------+-------+------+------+-------------+----------------+----------------+----------
 ...
  02   | 014  | 010    | 02   | 03    | 0023 | 001  |          67 |              1 |             35 | f
  02   | 014  | 010    | 02   | 03    | 0023 | 001  |          68 |             36 |             70 | f
@@ -72,20 +74,22 @@ order by prov, dpto, codloc, frac, radio, mza, lado, segmento_id
 execute 'drop table if exists "' || esquema || '".segmentos_desde_hasta_ids cascade;';
 execute '
 create table "' || esquema || '".segmentos_desde_hasta_ids as
-with                                                                                                                                                                    listado as ( select * from "' || esquema || '".listado)
+with listado as ( select * from "' || esquema || '".listado)
 select * from
 (
   select l.prov, l.dpto, l.codloc, l.frac, l.radio, l.mza, l.lado, s.segmento_id, l.id as desde_id
   from "' || esquema || '".segmentos_desde_hasta s
-  join listado l                                                                                                                                                    on s.prov = l.prov and s.dpto = l.dpto and s.codloc = l.codloc
+  join listado l on s.prov = l.prov and s.dpto = l.dpto and s.codloc = l.codloc
   and s.frac = l.frac and s.radio = l.radio and s.mza = l.mza and s.lado = l.lado
   and seg_lado_desde = orden_reco::integer
 ) as desdes
 natural join (
   select l.prov, l.dpto, l.codloc, l.frac, l.radio, l.mza, l.lado, s.segmento_id, l.id as hasta_id
   from "' || esquema || '".segmentos_desde_hasta s
-  join listado l                                                                                                                                                    on s.prov = l.prov and s.dpto = l.dpto and s.codloc = l.codloc                                                                                                          and s.frac = l.frac and s.radio = l.radio and s.mza = l.mza and s.lado = l.lado
-  and seg_lado_hasta = orden_reco::integer                                                                                                                              ) as hastas
+  join listado l on s.prov = l.prov and s.dpto = l.dpto and s.codloc = l.codloc
+  and s.frac = l.frac and s.radio = l.radio and s.mza = l.mza and s.lado = l.lado
+  and seg_lado_hasta = orden_reco::integer
+) as hastas
 order by prov, dpto, codloc, frac, radio, mza, lado
 ;
 ';
