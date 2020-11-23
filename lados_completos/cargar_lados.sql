@@ -27,7 +27,6 @@ with
       mza::integer as mza, lado::integer as lado,
       ccalle::integer, ncalle::text
   from "' || esquema || '".listado
-  where 
   ),
   e00 as (select * from "' || esquema || '".arc),
   de_e00 as (
