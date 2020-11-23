@@ -52,3 +52,30 @@ $function$
 ;
 
 
+create or replace function
+indec.segmentar_excedidos_ffrr(esquema text, ff integer, rr integer, umbral integer, deseado integer)
+    returns integer
+    language plpgsql volatile
+    set client_min_messages = error
+as $function$
+
+declare
+  excedidos record;
+begin
+for excedidos in
+  select segmento_id from indec.segmentos_excedidos_ffrr(esquema, ff, rr, umbral)
+loop
+  execute 'select indec.segmentar_listado_equilibrado(''' || esquema || ''', 
+  ''select * from "' || esquema || '".listado
+  join "' || esquema || '".segmentacion
+  on listado_id = listado.id
+  where segmento_id = ' || excedidos.segmento_id::text || ''', 
+  '' mza::integer, lado::integer, orden_reco::integer ''::text, ' || deseado || ')';
+end loop;
+
+return 1;
+end;
+$function$
+;
+
+
