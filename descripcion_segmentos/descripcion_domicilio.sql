@@ -33,7 +33,7 @@ execute '
 select
   ccalle || '' - '' || ncalle || '' '' ||  
     case
-    when nrocatastr is Null or nrocatastr = '''' nrocatastr = '0' then ''''
+    when nrocatastr is Null or nrocatastr = '''' or nrocatastr = '0' then ''''
     else '' S/N '' || nrocatastr
   end ||
   case
