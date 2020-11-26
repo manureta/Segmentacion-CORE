@@ -50,7 +50,7 @@ select
   end ||
   case
     when descripcio is Null or descripcio = '''' then ''''
-    else '' descripcio '' || descripcio
+    else '' descripción '' || descripcio
   end
 from "' || esquema || '".listado
 where ' || listado_id || ' = id
@@ -60,4 +60,84 @@ return domicilio;
 end;
 $function$
 ;
+
+
+create or replace function indec.descripcion_calle_desde_hasta(in esquema text, desde_id integer, hasta_id integer)
+ returns text
+ language plpgsql volatile
+set client_min_messages = error
+as $function$
+declare
+    calle text;
+    desde text;
+    hasta text;
+begin
+execute '
+select ccalle || '' - '' || ncalle 
+from "' || esquema || '".listado
+where ' || listado_id || ' = desde_id
+;' into calle;
+
+execute '
+select
+--  ccalle || '' - '' || ncalle || '' '' || -- la calle es la misma 
+    nrocatastr ||
+  case
+    when edificio is Null or edificio = '''' then ''''
+    else '' edificio '' || edificio
+  end ||
+  case
+    when entrada is Null or entrada = '''' then ''''
+    else '' entrada '' || entrada
+  end ||
+  case
+    when sector is Null or sector = '''' then ''''
+    else '' sector '' || sector
+  end ||
+  case
+    when piso is Null or piso = '''' then ''''
+    else '' piso '' || piso
+  end ||
+  case
+    when descripcio is Null or descripcio = '''' then ''''
+    else '' descripcio '' || descripcio
+  end
+from "' || esquema || '".listado
+where ' || listado_id || ' = desde_id
+;' into desde;
+
+execute '
+select
+--  ccalle || '' - '' || ncalle || '' '' ||  -- la calle es la misma
+    nrocatastr ||
+  case
+    when edificio is Null or edificio = '''' then ''''
+    else '' edificio '' || edificio
+  end ||
+  case
+    when entrada is Null or entrada = '''' then ''''
+    else '' entrada '' || entrada
+  end ||
+  case
+    when sector is Null or sector = '''' then ''''
+    else '' sector '' || sector
+  end ||
+  case
+    when piso is Null or piso = '''' then ''''
+    else '' piso '' || piso
+  end ||
+  case
+    when descripcio is Null or descripcio = '''' then ''''
+    else '' descripcio '' || descripcio
+  end
+from "' || esquema || '".listado
+where ' || listado_id || ' = hasta_id
+;' into hasta;
+
+return calle || ' desde ' || desde || ' hasta ' hasta;
+end;
+$function$
+;
+
+
 
