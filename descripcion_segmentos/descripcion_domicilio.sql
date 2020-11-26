@@ -31,7 +31,11 @@ declare domicilio text;
 begin
 execute '
 select
-  ccalle || '' - '' || ncalle || '' '' || nrocatastr || 
+  ccalle || '' - '' || ncalle || 
+    case
+    when nrocatastr is Null or nrocatastr = '''' or nrocatastr = '0' then '' S/N ''
+    else '' '' || nrocatastr
+  end ||
   case
     when edificio is Null or edificio = '''' then ''''
     else '' edificio '' || edificio
