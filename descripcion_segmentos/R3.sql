@@ -93,7 +93,7 @@ with
   from desde
   natural join hasta
   )
-select distinct segmento_id as segmento, 
+select distinct segmento_id::bigint as segmento, 
   mza::text as manzana, lado::text, 
   ccalle || '' - '' || ncalle || '' desde '' || desde || '' hasta '' || hasta as descripcion
 from segmentos_en_manzana as s
