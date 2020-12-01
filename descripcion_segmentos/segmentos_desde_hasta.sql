@@ -45,7 +45,9 @@ execute 'drop table if exists "' || esquema || '".segmentos_desde_hasta cascade;
 execute '
 create table "' || esquema || '".segmentos_desde_hasta as 
 with 
-listado as ( select * from "' || esquema || '".listado),
+listado as ( select id, prov, dpto, codloc, frac, radio, mza, lado,
+coalesce(CASE WHEN orden_reco='''' THEN NULL ELSE orden_reco END,''0'')::integer orden_reco
+from "' || esquema || '".listado),
 segmentacion as ( select * from "' || esquema || '".segmentacion),
 
 lados_desde_hasta as (
@@ -74,7 +76,11 @@ order by prov, dpto, codloc, frac, radio, mza, lado, segmento_id
 execute 'drop table if exists "' || esquema || '".segmentos_desde_hasta_ids cascade;';
 execute '
 create table "' || esquema || '".segmentos_desde_hasta_ids as
-with listado as ( select * from "' || esquema || '".listado)
+with 
+listado as ( select id, prov, dpto, codloc, frac, radio, mza, lado,
+orden_reco
+from "' || esquema || '".listado
+WHERE trim(orden_reco)!='''')
 select * from
 (
   select l.prov, l.dpto, l.codloc, l.frac, l.radio, l.mza, l.lado, s.segmento_id, l.id as desde_id
