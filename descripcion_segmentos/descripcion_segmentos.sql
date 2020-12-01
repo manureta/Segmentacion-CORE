@@ -5,8 +5,9 @@ crea la descripcion de las segmentos en mzas, lados
 para agregarse en el mapa del radio
 
 proceso posterior a la segmentación por lado completo
-autor: -h
+autor: -h, m
 fecha: 2/5/2020
+revision: 30/11/2020 
 
 ejemplo:
       link      | prov | depto | codloc | frac | radio | segmento | seg |                                                                                                 descripcion
@@ -72,22 +73,26 @@ viviendas_colectivas as (
   ),
 seg_mza_lados as (
   select substr(mzai,1,12) as ppdddlllffrr, 
-  segi as seg, substr(mzai,13,3) as mza, ladoi as lado
+  segi as seg, substr(mzai,13,3) as mza, ladoi as lado,
+  wkb_geometry geom
   from e00
   where mzai is not Null and mzai != '''' and ladoi != 0
   union
   select substr(mzad,1,12) as ppdddlllffrr,
-  segd as seg, substr(mzad,13,3) as mza, ladod as lado
+  segd as seg, substr(mzad,13,3) as mza, ladod as lado,
+  wkb_geometry geom
   from e00
   where mzad is not Null and mzad != '''' and ladod != 0
   ),
 lados_por_mza as (
-  select ppdddlllffrr, mza, count(*) as cant_lados
+  select ppdddlllffrr, mza, count(*) as cant_lados,
+    st_union(geom) geom
   from seg_mza_lados
   group by ppdddlllffrr, mza
   ),
 mzas_en_segmentos as (
-  select ppdddlllffrr, mza, seg, count(*) as cant_lados_en_seg
+  select ppdddlllffrr, mza, seg, count(*) as cant_lados_en_seg,
+    st_union(geom) geom
   from seg_mza_lados
   group by ppdddlllffrr, mza, seg
   ),
@@ -99,7 +104,8 @@ mzas_completas as (
   where cant_lados = cant_lados_en_seg
   ),
 lados_de_mzas_incompletas as (
-  select ppdddlllffrr, seg, mza, lado, lado::integer as i
+  select ppdddlllffrr, seg, mza, lado, lado::integer as i,
+  geom
   from seg_mza_lados
   where (ppdddlllffrr, seg, mza) not in (
     select ppdddlllffrr, seg, mza
@@ -132,7 +138,8 @@ lados_ordenados as (
   when min_no_esta > lado::integer then cant_lados - max_no_esta + lado::integer -- el hueco está arriba
   when min_no_esta = 1 and max_no_esta = cant_lados then lado::integer -- hay hueco a ambos lados, no empieza en 1 
   end
-  as orden
+  as orden,
+  geom
   from no_estan
   natural join
   lados_de_mzas_incompletas
@@ -142,11 +149,11 @@ lados_ordenados as (
   mzas_en_segmentos),
 descripciones_lados as (
   select ppdddlllffrr, seg, mza, lado, orden,
-  lado::text as descripcion_lado
+  lado::text as descripcion_lado, geom
   from lados_ordenados where (ppdddlllffrr, mza, lado) not in (select ppdddlllffrr, mza, lado from viviendas_colectivas)
   union 
   select ppdddlllffrr, seg, mza, lado, orden,
-  (lado::text || '' '' || descripcio)::text as descripcion_lado
+  (lado::text || '' '' || descripcio)::text as descripcion_lado, geom
   from lados_ordenados 
   join viviendas_colectivas
   using (ppdddlllffrr, mza, lado) -- (!) ver si hay más de 1 viv col en 1 lado hay que usar una agregacion de descripcio
@@ -163,7 +170,8 @@ descripciones_lados as (
 --  and case co.lado = l.lado end
   ),
 descripciones_mzas as (
-  select ppdddlllffrr, seg, ''Manzana ''||mza||'' completa'' as descripcion
+  select ppdddlllffrr, seg, ''Manzana ''||mza||'' completa'' as descripcion,
+    geom
   from mzas_completas
   union
   select ppdddlllffrr, seg,
@@ -175,7 +183,8 @@ descripciones_mzas as (
                                               -- cambia inicio de array por lado o lados según cuantos son
                                     ''}'',''''), -- saca fin de array }
                          '','', '', '') -- separador de lados
-    as descripcion
+    as descripcion,
+    st_union(geom) geom
   from descripciones_lados
   group by ppdddlllffrr, seg, mza
   order by ppdddlllffrr, seg, descripcion
@@ -185,7 +194,8 @@ select ppdddlllffrr || lpad(seg::text,2,''0'') as link,
      substr(ppdddlllffrr,6,3)::char(3) as codloc, 
      substr(ppdddlllffrr,9,2)::char(2) as frac, substr(ppdddlllffrr,11,2)::char(2) as radio, 
      lpad(seg::text,2,''0'') as segmento, seg,
-  string_agg(descripcion,''; '') as descripcion -- separador de manzanas
+  string_agg(descripcion,''; '') as descripcion, -- separador de manzanas
+  st_union(geom) geom
 from descripciones_mzas
 group by ppdddlllffrr, seg
 order by ppdddlllffrr, seg
