@@ -28,7 +28,7 @@ listado as (' || query || '),
 listado_sin_nulos as (
     select id, prov, dpto, codloc, frac, radio, mza, lado, nrocatastr,
     coalesce(sector,'''') sector, coalesce(edificio,'''') edificio, coalesce(entrada,'''') entrada,
-     piso, orden_reco::integer
+     piso, coalesce(CASE WHEN orden_reco='''' THEN NULL ELSE orden_reco END,''0'')::integer orden_reco
     from listado
     ),
 
