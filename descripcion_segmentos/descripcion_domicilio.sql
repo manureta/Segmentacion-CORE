@@ -33,8 +33,10 @@ execute '
 select
   ccalle || '' - '' || ncalle || 
     case
-    when nrocatastr is Null or nrocatastr = '''' or nrocatastr = ''0'' then '' S/N ''
-    else '' '' || nrocatastr
+    when nrocatastr is Null or trim(nrocatastr) = '''' or 
+         trim(nrocatastr) = ''0'' or trim(nrocatastr) = ''S/N'' 
+            then '' S/N ''
+    else '' Nº '' || nrocatastr || '' ''
   end ||
   case
     when edificio is Null or edificio = '''' then ''''
