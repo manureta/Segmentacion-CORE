@@ -93,13 +93,13 @@ with
   from desde
   natural join hasta
   )
-select distinct segmento_id::bigint as segmento, 
+select distinct segmento_id::bigint as segmento_id,
   mza::text as manzana, lado::text, 
   ccalle || '' - '' || ncalle || '' desde '' || desde || '' hasta '' || hasta as descripcion
 from segmentos_en_manzana as s
 join listado as l
 using (frac, radio, mza, lado)
-order by segmento_id, manzana, lado, descripcion
+order by segmento_id::bigint, manzana, lado, descripcion
 ;
 ';
 end;
