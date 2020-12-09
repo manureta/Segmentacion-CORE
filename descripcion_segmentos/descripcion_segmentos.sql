@@ -195,7 +195,8 @@ select ppdddlllffrr || lpad(seg::text,2,''0'') as link,
      substr(ppdddlllffrr,9,2)::char(2) as frac, substr(ppdddlllffrr,11,2)::char(2) as radio, 
      lpad(seg::text,2,''0'') as segmento, seg,
   string_agg(descripcion,''; '') as descripcion, -- separador de manzanas
-  st_union(geom) geom
+  st_union(geom) geom,
+  row_number() OVER() pseudo_id
 from descripciones_mzas
 group by ppdddlllffrr, seg
 order by ppdddlllffrr, seg
