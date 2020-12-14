@@ -59,7 +59,7 @@ select
     else '' descripción '' || descripcio
   end
 from "' || esquema || '".listado
-where ' || listado_id || ' = id
+where ' || listado.id || ' = id
 ;' into domicilio;
 
 return domicilio;
@@ -81,7 +81,7 @@ begin
 execute '
 select ccalle || '' - '' || ncalle 
 from "' || esquema || '".listado
-where ' || listado_id || ' = desde_id
+where listado.id  = ' || desde_id || '
 ;' into calle;
 
 execute '
@@ -109,7 +109,7 @@ select
     else '' descripcio '' || descripcio
   end
 from "' || esquema || '".listado
-where ' || listado_id || ' = desde_id
+where listado.id  = ' || desde_id || '
 ;' into desde;
 
 execute '
@@ -137,7 +137,7 @@ select
     else '' descripcio '' || descripcio
   end
 from "' || esquema || '".listado
-where ' || listado_id || ' = hasta_id
+where listado.id  = ' || hasta_id || '
 ;' into hasta;
 
 return calle || ' desde ' || desde || ' hasta ' hasta;
