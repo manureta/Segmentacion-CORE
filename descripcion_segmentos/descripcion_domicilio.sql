@@ -106,7 +106,7 @@ select
   end ||
   case
     when descripcio is Null or descripcio = '''' then ''''
-    else '' descripcio '' || descripcio
+    else '' (descripción: '' || descripcio || '') ''
   end
 from "' || esquema || '".listado
 where listado.id  = ' || desde_id || '
@@ -134,13 +134,13 @@ select
   end ||
   case
     when descripcio is Null or descripcio = '''' then ''''
-    else '' descripcio '' || descripcio
+    else '' (descripción: '' || descripcio || '') ''
   end
 from "' || esquema || '".listado
 where listado.id  = ' || hasta_id || '
 ;' into hasta;
 
-return calle || ' desde ' || desde || ' hasta ' hasta;
+return calle || ' desde ' || desde || ' hasta ' || hasta;
 end;
 $function$
 ;
