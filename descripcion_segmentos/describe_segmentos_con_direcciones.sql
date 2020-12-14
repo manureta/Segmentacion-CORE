@@ -10,9 +10,11 @@ fecha: 14/12/2020
 
 */
 
+DROP FUNCTION indec.describe_segmentos_con_direcciones(text);
 create or replace function indec.describe_segmentos_con_direcciones(esquema text)
  returns table (
- prov integer, dpto integer, codloc integer, frac integer, radio integer, segmento bigint, descripcion text
+ prov integer, dpto integer, codloc integer, frac integer, radio integer, 
+ mza integer, lado integer, segmento bigint, descripcion text
 )
  language plpgsql volatile
 set client_min_messages = error
@@ -24,11 +26,11 @@ execute '
 with 
 segmento_lado_desde_hasta as (
     select prov, dpto, codloc, frac, radio, mza, lado, segmento_id, 
-    --seg_lado_desde, seg_lado_hasta, completo,
-    indec.descripcion_calle_desde_hasta(''' || esquema || ''', seg_lado_desde, seg_lado_hasta)::text as descripcion
-    from "' || esquema || '".segmentos_desde_hasta)
+    desde_id, hasta_id,
+    indec.descripcion_calle_desde_hasta(''' || esquema || ''', desde_id, hasta_id)::text as descripcion
+    from "' || esquema || '".segmentos_desde_hasta_ids)
 select prov::integer, dpto::integer, codloc::integer, frac::integer, radio::integer,
---    mza::integer, lado::integer,
+    mza::integer, lado::integer,
     segmento_id::bigint, descripcion
 from segmento_lado_desde_hasta
 ';
