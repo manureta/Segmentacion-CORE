@@ -62,7 +62,8 @@ order by prov, dpto, codloc, frac, radio, mza, lado
 -- desde hasta lado por segmento
 select prov, dpto, codloc, frac, radio, mza, lado, segmento_id,
   min(listado.orden_reco::integer) as seg_lado_desde, max(listado.orden_reco::integer) as seg_lado_hasta,
-  (min(listado.orden_reco::integer) = lado_desde and max(listado.orden_reco::integer) = lado_hasta) as completo
+  (min(listado.orden_reco::integer) = lado_desde and max(listado.orden_reco::integer) = lado_hasta) as completo,
+  count(*) as viviendas
 from listado
 join segmentacion
 on listado.id = listado_id
