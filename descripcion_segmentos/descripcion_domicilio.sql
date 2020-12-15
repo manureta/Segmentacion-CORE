@@ -59,7 +59,7 @@ select
     else '' descripción '' || descripcio
   end
 from "' || esquema || '".listado
-where ' || listado.id || ' = id
+where ' || listado_id || ' = id
 ;' into domicilio;
 
 return domicilio;
