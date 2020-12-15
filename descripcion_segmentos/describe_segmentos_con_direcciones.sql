@@ -10,7 +10,7 @@ fecha: 14/12/2020
 
 */
 
-DROP FUNCTION indec.describe_segmentos_con_direcciones(text,bigint);
+DROP FUNCTION if exists indec.describe_segmentos_con_direcciones(text,bigint);
 create or replace function indec.describe_segmentos_con_direcciones(esquema text, s_id bigint)
  returns table (
  prov integer, dpto integer, codloc integer, frac integer, radio integer,
