@@ -30,6 +30,7 @@ segmento_lado_desde_hasta as (
     indec.descripcion_calle_desde_hasta(''' || esquema || ''', desde_id, hasta_id)::text as descripcion,
     viviendas
   from "' || esquema || '".segmentos_desde_hasta_ids
+  where segmento_id::bigint = ' || s_id || '
   order by prov::integer, dpto::integer, codloc::integer, frac::integer, radio::integer,
     mza::integer, lado::integer
   ),
@@ -39,7 +40,6 @@ segmento_lados as (
     string_agg('' Lado '' || lado::text || '', '' || descripcion, ''; '') as descripcion,
     sum(viviendas) as viviendas
   from segmento_lado_desde_hasta
-  where segmento_id::bigint = ' || s_id || '
   group by prov::integer, dpto::integer, codloc::integer, frac::integer, radio::integer,
     mza::integer, segmento_id::bigint
   )
