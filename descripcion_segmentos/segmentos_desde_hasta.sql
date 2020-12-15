@@ -74,6 +74,10 @@ order by prov, dpto, codloc, frac, radio, mza, lado, segmento_id
 ;
 ';
 
+execute 'CREATE INDEX idx_segmentos_desde_hasta ON
+"' || esquema || '".segmentos_desde_hasta (prov, dpto, codloc, frac, radio, mza, lado,
+segmento_id)';
+
 execute 'drop table if exists "' || esquema || '".segmentos_desde_hasta_ids cascade;';
 execute '
 create table "' || esquema || '".segmentos_desde_hasta_ids as
@@ -102,6 +106,9 @@ natural join (
 order by prov, dpto, codloc, frac, radio, mza, lado
 ;
 ';
+
+execute 'CREATE INDEX idx_segmentos_desde_hasta_ids ON
+"' || esquema || '".segmentos_desde_hasta_ids (prov, dpto, codloc, frac, radio, mza, lado)';
 
 return 1;
 end;
