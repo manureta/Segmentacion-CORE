@@ -54,7 +54,7 @@ deseado_manzana as (
 pisos_enteros as (
     select prov, dpto, codloc, frac, radio, mza, lado, 
         nrocatastr, sector, edificio, entrada,
-        piso, min(orden_reco::integer) as piso_id
+        piso, min(id) as piso_id
     from listado_sin_nulos
     group by prov, dpto, codloc, frac, radio, mza, lado,
         nrocatastr, sector, edificio, entrada, piso
