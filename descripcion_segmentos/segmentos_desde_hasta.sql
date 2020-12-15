@@ -89,7 +89,7 @@ WHERE trim(orden_reco)!='''')
 select * from
 (
   select l.prov, l.dpto, l.codloc, l.frac, l.radio, l.mza, l.lado, s.segmento_id, l.id as desde_id,
-  viviendas
+  viviendas, completo
   from "' || esquema || '".segmentos_desde_hasta s
   join listado l on s.prov = l.prov and s.dpto = l.dpto and s.codloc = l.codloc
   and s.frac = l.frac and s.radio = l.radio and s.mza = l.mza and s.lado = l.lado
@@ -97,7 +97,7 @@ select * from
 ) as desdes
 natural join (
   select l.prov, l.dpto, l.codloc, l.frac, l.radio, l.mza, l.lado, s.segmento_id, l.id as hasta_id,
-  viviendas
+  viviendas, completo
   from "' || esquema || '".segmentos_desde_hasta s
   join listado l on s.prov = l.prov and s.dpto = l.dpto and s.codloc = l.codloc
   and s.frac = l.frac and s.radio = l.radio and s.mza = l.mza and s.lado = l.lado
