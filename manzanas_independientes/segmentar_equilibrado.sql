@@ -40,6 +40,7 @@ casos as (
            greatest(1, floor(count(*)/deseado)) as min
     from listado_sin_nulos, parametros
     group by prov, dpto, codloc, frac, radio, mza, deseado
+    order by prov, dpto, codloc, frac, radio, mza, deseado
     ),
 
 deseado_manzana as (
@@ -87,6 +88,7 @@ segmentos_id as (
         dpto, frac, radio, mza, sgm_mza
     from segmento_id_en_mza
     group by dpto, frac, radio, mza, sgm_mza
+    order by dpto, frac, radio, mza, sgm_mza
     )
 
 update "' || aglomerado || '".segmentacion sgm
