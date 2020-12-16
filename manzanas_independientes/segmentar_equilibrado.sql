@@ -51,51 +51,51 @@ deseado_manzana as (
     from casos, parametros
     ),
 
-pisos_enteros as (
-    select prov, dpto, codloc, frac, radio, mza, lado, 
-        nrocatastr, sector, edificio, entrada,
-        piso, min(id) as piso_id
-    from listado_sin_nulos
-    group by prov, dpto, codloc, frac, radio, mza, lado,
-        nrocatastr, sector, edificio, entrada, piso
-    ),
 pisos_abiertos as (
-    select id, prov, dpto, codloc, frac, radio, mza, lado, 
-        nrocatastr, sector, edificio, entrada, piso,
-        orden_reco::integer, piso_id,
+    select id, prov, dpto, codloc, frac, radio, mza, lado, nrocatastr, sector, edificio, entrada, piso, orden_reco::integer,
         row_number() over w as row, rank() over w as rank
-    from pisos_enteros
-    natural join listado_sin_nulos
+    from listado_sin_nulos
     window w as (
         partition by prov, dpto, codloc, frac, radio, mza
-        order by lado::integer, orden_reco::integer
-        )
+        order by lado::integer, orden_reco::integer)
     ),
-
-segmento_id_en_mza as (
-    select id, prov, dpto, codloc, frac, radio, mza, lado, 
-        nrocatastr, sector, edificio, entrada, piso, orden_reco::integer,
+asignacion_segmentos as (
+    select id, prov, dpto, codloc, frac, radio, mza, lado, nrocatastr, sector, edificio, entrada, piso, orden_reco::integer,
         floor((rank - 1)*segs_x_mza/vivs) + 1 as sgm_mza, rank
     from deseado_manzana
     join pisos_abiertos
     using (prov, dpto, codloc, frac, radio, mza)
     ),
+asignacion_segmentos_pisos_enteros as (
+    select prov, dpto, codloc, frac, radio, mza, lado, nrocatastr, sector, edificio, entrada, piso, min(sgm_mza) as sgm_mza
+    from asignacion_segmentos
+    group by prov, dpto, codloc, frac, radio, mza, lado,
+        nrocatastr, sector, edificio, entrada, piso
+    ),
+segmento_id_en_mza as (
+  select id, prov, dpto, codloc, frac, radio, mza, lado, nrocatastr, sector, edificio, entrada, piso, orden_reco::integer,
+    sgm_mza
+  from listado_sin_nulos
+  join asignacion_segmentos_pisos_enteros
+  using (prov, dpto, codloc, frac, radio, mza, lado, nrocatastr, sector, edificio, entrada, piso)
+  ),
+
 segmentos_id as (
     select 
         -- row_number() over (order by dpto, frac, radio, mza, sgm_mza) 
         nextval(''"' || aglomerado || '".segmentos_seq'')
         as segmento_id,
-        dpto, frac, radio, mza, sgm_mza
+        prov, dpto, codloc, frac, radio, mza, sgm_mza
     from segmento_id_en_mza
-    group by dpto, frac, radio, mza, sgm_mza
-    order by dpto, frac, radio, mza, sgm_mza
+    group by prov, dpto, codloc, frac, radio, mza, sgm_mza
+    order by prov, dpto, codloc, frac, radio, mza, sgm_mza
     )
 
 update "' || aglomerado || '".segmentacion sgm
 set segmento_id = j.segmento_id
 from (segmentos_id
 join segmento_id_en_mza
-using (dpto, frac, radio, mza, sgm_mza)) j
+using (prov, dpto, codloc, frac, radio, mza, sgm_mza)) j
 where listado_id = j.id
 ';
 return 1;
