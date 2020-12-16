@@ -1,3 +1,8 @@
+create index listado_idx on e0002.listado (id);
+create index listado_pdcfrml on e0002.listado (prov, dpto, codloc, frac, radio, mza, lado);
+create index listado_piso on e0002.listado (prov, dpto, codloc, frac, radio, mza, lado, nrocatastr, sector, edificio, entrada, piso);
+
+
 with
 parametros as (select 36::float as deseado),
 listado as (select * from e0002.listado),
@@ -19,43 +24,32 @@ deseado_manzana as (
         case when abs(vivs/max - deseado) < abs(vivs/min - deseado) then max else min end as segs_x_mza
     from casos, parametros
     ),
-pisos_enteros as (
-    select prov, dpto, codloc, frac, radio, mza, lado, nrocatastr, sector, edificio, entrada, piso, min(id) as piso_id
-    from listado_sin_nulos
-    group by prov, dpto, codloc, frac, radio, mza, lado,
-        nrocatastr, sector, edificio, entrada, piso
-    ),
 pisos_abiertos as (
-    select id, prov, dpto, codloc, frac, radio, mza, lado, nrocatastr, sector, edificio, entrada, piso, orden_reco::integer, piso_id,
+    select id, prov, dpto, codloc, frac, radio, mza, lado, nrocatastr, sector, edificio, entrada, piso, orden_reco::integer,
         row_number() over w as row, rank() over w as rank
-    from pisos_enteros
-    natural join listado_sin_nulos
+    from listado_sin_nulos
     window w as (
         partition by prov, dpto, codloc, frac, radio, mza
         order by lado::integer, orden_reco::integer)
     ),
-particion as (
-    select id, piso_id, prov, dpto, codloc, frac, radio, mza, lado, nrocatastr, sector, edificio, entrada, piso, orden_reco::integer,
+asignacion_segmentos as (
+    select id, prov, dpto, codloc, frac, radio, mza, lado, nrocatastr, sector, edificio, entrada, piso, orden_reco::integer,
         floor((rank - 1)*segs_x_mza/vivs) + 1 as sgm_mza, rank
     from deseado_manzana
     join pisos_abiertos
     using (prov, dpto, codloc, frac, radio, mza)
     ),
-particion_piso_sgm as (
-  select prov, dpto, codloc, frac, radio, mza, lado, nrocatastr, sector, edificio, entrada, piso, sgm_mza
-  from particion
-  group by prov, dpto, codloc, frac, radio, mza, lado, nrocatastr, sector, edificio, entrada, piso, sgm_mza
-  ),
-pisos_partidos as (
-  select prov, dpto, codloc, frac, radio, mza, lado, nrocatastr, sector, edificio, entrada, piso
-  from particion_piso_sgm
-  group by prov, dpto, codloc, frac, radio, mza, lado, nrocatastr, sector, edificio, entrada, piso
-  having count(*) > 1
-  )
-select prov, dpto, codloc, frac, radio, mza, lado, nrocatastr, sector, edificio, entrada, piso, sgm_mza, count(*)
-from particion
-natural join pisos_partidos
-group by prov, dpto, codloc, frac, radio, mza, lado, nrocatastr, sector, edificio, entrada, piso, sgm_mza
-order by prov, dpto, codloc, frac, radio, mza, lado, nrocatastr, sector, edificio, entrada, piso, sgm_mza
+asignacion_segmentos_pisos_enteros as (
+    select prov, dpto, codloc, frac, radio, mza, lado, nrocatastr, sector, edificio, entrada, piso, min(sgm_mza) as sgm_mza
+    from asignacion_segmentos
+    group by prov, dpto, codloc, frac, radio, mza, lado,
+        nrocatastr, sector, edificio, entrada, piso
+    )
+select id, prov, dpto, codloc, frac, radio, mza, lado, nrocatastr, sector, edificio, entrada, piso, orden_reco::integer,
+    sgm_mza
+from listado_sin_nulos
+join asignacion_segmentos_pisos_enteros
+using (prov, dpto, codloc, frac, radio, mza, lado, nrocatastr, sector, edificio, entrada, piso)
 ;
+
 
