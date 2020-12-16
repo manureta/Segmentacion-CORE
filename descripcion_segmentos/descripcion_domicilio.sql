@@ -68,7 +68,7 @@ $function$
 ;
 
 
-create or replace function indec.descripcion_calle_desde_hasta(in esquema text, desde_id integer, hasta_id integer)
+create or replace function indec.descripcion_calle_desde_hasta(in esquema text, desde_id integer, hasta_id integer, completo boolean)
  returns text
  language plpgsql volatile
 set client_min_messages = error
@@ -83,6 +83,10 @@ select ccalle || '' - '' || ncalle
 from "' || esquema || '".listado
 where listado.id  = ' || desde_id || '
 ;' into calle;
+
+if completo then 
+  return calle;
+end if;
 
 execute '
 select

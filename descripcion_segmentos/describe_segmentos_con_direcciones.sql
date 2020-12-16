@@ -27,7 +27,11 @@ with
 segmento_lado_desde_hasta as (
   select prov, dpto, codloc, frac, radio, mza, lado, segmento_id,
     desde_id, hasta_id, completo,
-    indec.descripcion_calle_desde_hasta(''' || esquema || ''', desde_id, hasta_id)::text as descripcion,
+    ''Lado '' || lado::text ||
+      case when completo then '' completo ''
+            else '''' 
+      end || 
+    indec.descripcion_calle_desde_hasta(''' || esquema || ''', desde_id, hasta_id, completo)::text as descripcion,
     viviendas
   from "' || esquema || '".segmentos_desde_hasta_ids
   where segmento_id::bigint = ' || s_id || '
@@ -37,9 +41,7 @@ segmento_lado_desde_hasta as (
 segmento_lados as (
   select prov::integer, dpto::integer, codloc::integer, frac::integer, radio::integer,
     mza::integer, segmento_id::bigint, 
-    string_agg('' Lado '' || lado::text || 
-      case when completo then '' completo '' else '''' end ||
-        '', '' || descripcion, ''; '') as descripcion,
+    string_agg(descripcion, '', '') as descripcion,
     sum(viviendas) as viviendas
   from segmento_lado_desde_hasta
   group by prov::integer, dpto::integer, codloc::integer, frac::integer, radio::integer,
@@ -47,7 +49,7 @@ segmento_lados as (
   )
 select prov::integer, dpto::integer, codloc::integer, frac::integer, radio::integer,
   segmento_id::bigint, 
-  string_agg('' Manzana '' || mza::text || '', '' || descripcion, ''. '') as descripcion,
+  string_agg(''Manzana '' || mza::text || '': '' || descripcion, ''. '') as descripcion,
   sum(viviendas) as viviendas
 from segmento_lados
 group by prov::integer, dpto::integer, codloc::integer, frac::integer, radio::integer,
@@ -74,8 +76,12 @@ execute '
 with
 segmento_lado_desde_hasta as (
   select prov, dpto, codloc, frac, radio, mza, lado, segmento_id,
-    desde_id, hasta_id,
-    indec.descripcion_calle_desde_hasta(''' || esquema || ''', desde_id, hasta_id)::text as descripcion,
+    desde_id, hasta_id, completo,
+    ''Lado '' || lado::text ||
+      case when completo then '' completo ''
+           else ''''
+      end ||
+    indec.descripcion_calle_desde_hasta(''' || esquema || ''', desde_id, hasta_id, completo)::text as descripcion,
     viviendas
   from "' || esquema || '".segmentos_desde_hasta_ids
   order by prov::integer, dpto::integer, codloc::integer, frac::integer, radio::integer,
@@ -84,7 +90,7 @@ segmento_lado_desde_hasta as (
 segmento_lados as (
   select prov::integer, dpto::integer, codloc::integer, frac::integer, radio::integer,
     mza::integer, segmento_id::bigint, 
-    string_agg('' Lado '' || lado::text || '', '' || descripcion, ''; '') as descripcion,
+    string_agg(descripcion, '', '') as descripcion,
     sum(viviendas) as viviendas
   from segmento_lado_desde_hasta
   group by prov::integer, dpto::integer, codloc::integer, frac::integer, radio::integer,
@@ -92,7 +98,7 @@ segmento_lados as (
   )
 select prov::integer, dpto::integer, codloc::integer, frac::integer, radio::integer,
   segmento_id::bigint, 
-  string_agg('' Manzana '' || mza::text || '', '' || descripcion, ''. '') as descripcion,
+  string_agg(''Manzana '' || mza::text || '': '' || descripcion, ''. '') as descripcion,
   sum(viviendas) as viviendas
 from segmento_lados
 group by prov::integer, dpto::integer, codloc::integer, frac::integer, radio::integer,
