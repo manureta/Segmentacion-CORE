@@ -46,7 +46,8 @@ execute '
 create table "' || esquema || '".segmentos_desde_hasta as 
 with 
 listado as ( select id, prov, dpto, codloc, frac, radio, mza, lado,
-coalesce(CASE WHEN orden_reco='''' THEN NULL ELSE orden_reco END,''0'')::integer orden_reco
+coalesce(CASE WHEN orden_reco='''' THEN NULL ELSE orden_reco END,''0'')::integer orden_reco,
+tipoviv
 from "' || esquema || '".listado),
 segmentacion as ( select * from "' || esquema || '".segmentacion),
 
@@ -63,7 +64,7 @@ order by prov, dpto, codloc, frac, radio, mza, lado
 select prov, dpto, codloc, frac, radio, mza, lado, segmento_id,
   min(listado.orden_reco::integer) as seg_lado_desde, max(listado.orden_reco::integer) as seg_lado_hasta,
   (min(listado.orden_reco::integer) = lado_desde and max(listado.orden_reco::integer) = lado_hasta) as completo,
-  count(*) as viviendas
+  count(indec.contar_vivienda(tipoviv)) as viviendas
 from listado
 join segmentacion
 on listado.id = listado_id

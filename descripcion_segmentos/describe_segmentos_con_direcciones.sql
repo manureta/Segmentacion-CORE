@@ -29,7 +29,7 @@ segmento_lado_desde_hasta as (
     desde_id, hasta_id, completo,
     ''Lado '' || lado::text ||
       case when completo then '' completo ''
-            else '''' 
+            else '' '' 
       end || 
     indec.descripcion_calle_desde_hasta(''' || esquema || ''', desde_id, hasta_id, completo)::text as descripcion,
     viviendas
@@ -79,7 +79,7 @@ segmento_lado_desde_hasta as (
     desde_id, hasta_id, completo,
     ''Lado '' || lado::text ||
       case when completo then '' completo ''
-           else ''''
+           else '' ''
       end ||
     indec.descripcion_calle_desde_hasta(''' || esquema || ''', desde_id, hasta_id, completo)::text as descripcion,
     viviendas
