@@ -49,28 +49,17 @@ deseado_redondeado as (
     from casos, parametros
     ),
 
-pisos_enteros as (
-    select prov, dpto, codloc, frac, radio, mza, lado,
-        nrocatastr, sector, edificio, entrada,
-        piso, min(orden_reco::integer) as piso_id
-    from listado_sin_nulos
-    group by prov, dpto, codloc, frac, radio, mza, lado,
-        nrocatastr, sector, edificio, entrada, piso
-    ),
 pisos_abiertos as (
-    select id, prov, dpto, codloc, frac, radio, mza, lado,
-        nrocatastr, sector, edificio, entrada, piso,
-        orden_reco::integer, piso_id,
+    select id, prov, dpto, codloc, frac, radio, mza, lado, nrocatastr, sector, edificio, entrada, piso, orden_reco::integer,
         row_number() over w as row, rank() over w as rank
-    from pisos_enteros
-    natural join listado_sin_nulos
+    from listado_sin_nulos
     window w as (
-        partition by prov, dpto, codloc, frac, radio
-        order by ' || orden_recorrido || ' --orden_reco::integer
+        partition by prov, dpto, codloc, frac, radio,
+        order by ' || orden_recorrido || '
         )
     ),
 
-segmento_id_en_listado as (
+asignacion_segmentos as (
     select id, prov, dpto, codloc, frac, radio, mza, lado,
         nrocatastr, sector, edificio, entrada, piso, orden_reco::integer,
         floor((rank - 1)*segs_x_listado/vivs) + 1 as sgm_listado, rank
@@ -78,12 +67,20 @@ segmento_id_en_listado as (
     join pisos_abiertos
     using (prov, dpto, codloc, frac, radio)
     ),
+
+asignacion_segmentos_pisos_enteros as (
+    select prov, dpto, codloc, frac, radio, mza, lado, nrocatastr, sector, edificio, entrada, piso, min(sgm_listado) as sgm_listado
+    from segmento_id_en_listado
+    group by prov, dpto, codloc, frac, radio, mza, lado,
+        nrocatastr, sector, edificio, entrada, piso
+    ),
+
 segmentos_id as (
     select
         nextval(''"' || esquema || '".segmentos_seq'')
         as segmento_id,
         prov, dpto, codloc, frac, radio, sgm_listado
-    from segmento_id_en_listado
+    from asignacion_segmentos_pisos_enteros
     group by prov, dpto, codloc, frac, radio, sgm_listado
     order by prov, dpto, codloc, frac, radio, sgm_listado
     )
