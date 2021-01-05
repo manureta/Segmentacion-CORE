@@ -54,7 +54,7 @@ pisos_abiertos as (
         row_number() over w as row, rank() over w as rank
     from listado_sin_nulos
     window w as (
-        partition by prov, dpto, codloc, frac, radio,
+        partition by prov, dpto, codloc, frac, radio
         order by ' || orden_recorrido || '
         )
     ),
