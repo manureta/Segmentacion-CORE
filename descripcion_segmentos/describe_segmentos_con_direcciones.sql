@@ -66,7 +66,7 @@ segmento_lados as (
   )
 select prov::integer, dpto::integer, codloc::integer, frac::integer, radio::integer,
   segmento_id::bigint, seg::text, 
-  string_agg(''Manzana '' || mza::text || '': '' || descripcion, ''. '') as descripcion,
+  string_agg(''Manzana '' || lpad(mza::integer::text, 3, ''0'') || '': '' || descripcion, ''. '') as descripcion,
   sum(viviendas) as viviendas
 from segmento_lados
 join etiquetas
