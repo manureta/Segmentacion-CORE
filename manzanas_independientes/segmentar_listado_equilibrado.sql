@@ -70,7 +70,7 @@ asignacion_segmentos as (
 
 asignacion_segmentos_pisos_enteros as (
     select prov, dpto, codloc, frac, radio, mza, lado, nrocatastr, sector, edificio, entrada, piso, min(sgm_listado) as sgm_listado
-    from segmento_id_en_listado
+    from asignacion_segmentos
     group by prov, dpto, codloc, frac, radio, mza, lado,
         nrocatastr, sector, edificio, entrada, piso
     ),
