@@ -45,7 +45,7 @@ etiquetas as (
 segmento_lado_desde_hasta as (
   select prov, dpto, codloc, frac, radio, mza, lado, segmento_id,
     desde_id, hasta_id, completo,
-    ''Lado '' || lado::text ||
+    ''Lado '' || lpad(lado::integer::text, 2, ''0'') ||
       case when completo then '' completo ''
            else '' ''
       end ||
