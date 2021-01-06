@@ -26,7 +26,8 @@ return query
 execute '
 with minimos as (
   select prov, dpto, codloc, frac, radio, segmento_id, 
-    min(mza::integer) as minmza, min(lado::integer) as minlado, min(orden_reco::integer) as minreco, 
+    min(mza::integer) as minmza, min(lado::integer) as minlado, min(
+    (CASE WHEN orden_reco='''' THEN 0 ELSE orden_reco::integer END)::integer) as minreco, 
     min(sector) as minsector, min(edificio) as minedificio, min(entrada) as minentrada,
     max(REGEXP_REPLACE(COALESCE(piso::character varying, ''0''), ''[^0-9]*'' ,''0'')::integer) as maxpiso
   from "' || esquema || '".listado
