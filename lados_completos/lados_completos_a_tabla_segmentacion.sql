@@ -56,6 +56,7 @@ with segmentos_ids as (
     select prov, dpto, codloc, frac, radio, nro_segmento_en_radio,
         nextval(''"' || esquema || '".segmentos_seq'') as segmento_id
     from "' || esquema || '".v_segmentos_lados_completos
+    where frac::integer = ' || _frac || ' and radio::integer = ' || _radio || '
     group by prov, dpto, codloc, frac, radio, nro_segmento_en_radio
     ),
     mzas_lados as (
