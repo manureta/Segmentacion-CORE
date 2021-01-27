@@ -28,9 +28,11 @@ language sql stable
 ;';
 
 
-execute 'drop table if exists "' || esquema || '".segmentacion_pos_muestra;';
-execute 'create table "' || esquema || '".segmentacion_pos_muestra as 
+--execute 'drop table if exists "' || esquema || '".segmentacion_pre_muestra;';
+execute 'create table "' || esquema || '".segmentacion_pre_muestra as 
 select * from "' || esquema || '".segmentacion;';
+--- esto es para guardar la segmentación hecha 
+--- (!)  esta function se debe correr UNA SOLA VEZ
 
 execute 'drop table if exists "' || esquema || '".para_la_muestra;';
 execute '
@@ -131,7 +133,7 @@ asignacion_sin_cortar_piso as (
     using (prov, dpto, codloc, frac, radio, mza, lado, nrocatastr, sector, edificio, entrada, piso)
     )
 
-update "' || esquema || '".segmentacion_pos_muestra sgm
+update "' || esquema || '".segmentacion sgm
 set segmento_id = case
   when sgm_listado = 1 then pre_censal_id1
   when sgm_listado = 2 then pre_censal_id2

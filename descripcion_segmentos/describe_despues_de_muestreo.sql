@@ -33,7 +33,7 @@ with minimos as (
     min(sector) as minsector, min(edificio) as minedificio, min(entrada) as minentrada,
     max(REGEXP_REPLACE(COALESCE(piso::character varying, ''0''), ''[^0-9]*'' ,''0'')::integer) as maxpiso
   from "' || esquema || '".listado
-  join "' || esquema || '".segmentacion_pos_muestra
+  join "' || esquema || '".segmentacion
   on listado_id = listado.id
   group by prov, dpto, codloc, frac, radio, segmento_id
   ),
