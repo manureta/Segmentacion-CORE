@@ -28,6 +28,10 @@ language sql stable
 ;';
 
 
+execute 'drop table if exists "' || esquema || '".segmentacion_pos_muestra;';
+execute 'create table "' || esquema || '".segmentacion_pos_muestra as 
+select * from "' || esquema || '".segmentacion;';
+
 execute 'drop table if exists "' || esquema || '".para_la_muestra;';
 execute '
 create table "' || esquema || '".para_la_muestra as
@@ -120,16 +124,23 @@ asignacion_segmentos_pisos_enteros as (
         nrocatastr, sector, edificio, entrada, piso, s_id
     )
 
-update "' || esquema || '".segmentacion sgm
+asignacion_sin_cortar_piso as (
+    select prov, dpto, codloc, frac, radio, mza, lado, nrocatastr, sector, edificio, entrada, piso, p.sgm_listado, p.s_id, orden_reco
+    from asignacion_segmentos_pisos_enteros p
+    join asignacion_segmentos
+    using (prov, dpto, codloc, frac, radio, mza, lado, nrocatastr, sector, edificio, entrada, piso)
+    )
+
+update "' || esquema || '".segmentacion_pos_muestra sgm
 set segmento_id = case
   when sgm_listado = 1 then pre_censal_id1
   when sgm_listado = 2 then pre_censal_id2
   else 0 -- ERROR
   end
 from ("' || esquema || '".muestra
-join asignacion_segmentos_pisos_enteros
+join asignacion_sin_cortar_piso
 on s_id = pos_censal_id) j
-where segmento_id = pos_censal_id
+where sgm.segmento_id = pos_censal_id
 ;';
 
 return 1;
