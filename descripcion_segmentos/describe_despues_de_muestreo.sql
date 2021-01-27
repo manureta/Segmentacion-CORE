@@ -16,7 +16,8 @@ DROP FUNCTION if exists indec.describe_despues_de_muestreo(text);
 create or replace function indec.describe_despues_de_muestreo(esquema text)
  returns table (
  prov integer, dpto integer, codloc integer, frac integer, radio integer,
- segmento_id bigint, seg text, descripcion text, viviendas numeric
+ segmento_id bigint, seg text, 
+ descripcion text, viviendas numeric
 )
  language plpgsql volatile
 set client_min_messages = error
@@ -32,7 +33,7 @@ with minimos as (
     min(sector) as minsector, min(edificio) as minedificio, min(entrada) as minentrada,
     max(REGEXP_REPLACE(COALESCE(piso::character varying, ''0''), ''[^0-9]*'' ,''0'')::integer) as maxpiso
   from "' || esquema || '".listado
-  join "' || esquema || '".segmentacion
+  join "' || esquema || '".segmentacion_pos_muestra
   on listado_id = listado.id
   group by prov, dpto, codloc, frac, radio, segmento_id
   ),
@@ -41,16 +42,15 @@ etiquetas as (
   from minimos
   join "' || esquema || '".para_la_muestra 
   on segmento_id = s_id
-  where not muestreado
+  where muestreado is Null
   ),
 etiquetas_muestra as (
-  select segmento_id, 60 + rank() over w as seg as seg
+  select segmento_id, 60 + rank() over w as seg 
   from minimos
-  join "' || esquema || '".para_la_muestra m
-  on segmento_id = s_id
-  where muestreado
+  join e0002.muestra
+  on (segmento_id = pre_censal_id1 or segmento_id = pre_censal_id2)
   window w as (
-    partition by m.prov, m.dpto, m.codloc, m.frac, m.radio
+    partition by prov, dpto, codloc, frac, radio
     order by minmza, minlado, minreco, minsector, minedificio, minentrada, maxpiso desc
     )
   ),
@@ -77,6 +77,7 @@ segmento_lados as (
   group by prov::integer, dpto::integer, codloc::integer, frac::integer, radio::integer,
     mza::integer, segmento_id::bigint
   )
+
 select prov::integer, dpto::integer, codloc::integer, frac::integer, radio::integer,
   segmento_id::bigint, seg::text, 
   string_agg(''Manzana '' || lpad(mza::integer::text, 3, ''0'') || '': '' || descripcion, ''. '') as descripcion,
@@ -86,6 +87,17 @@ join etiquetas
 using (segmento_id)
 group by prov::integer, dpto::integer, codloc::integer, frac::integer, radio::integer,
   segmento_id::bigint, seg::text
+union
+select prov::integer, dpto::integer, codloc::integer, frac::integer, radio::integer,                                                                                                              segmento_id::bigint, seg::text,
+  string_agg(''Manzana '' || lpad(mza::integer::text, 3, ''0'') || '': '' || descripcion, ''. '') as descripcion,
+  sum(viviendas) as viviendas
+from segmento_lados
+join etiquetas_muestra
+using (segmento_id)
+group by prov::integer, dpto::integer, codloc::integer, frac::integer, radio::integer,
+  segmento_id::bigint, seg::text
+
+
 ';
 end;
 $function$
