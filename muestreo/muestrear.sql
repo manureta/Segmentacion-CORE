@@ -122,10 +122,10 @@ asignacion_segmentos_pisos_enteros as (
     from asignacion_segmentos
     group by prov, dpto, codloc, frac, radio, mza, lado,
         nrocatastr, sector, edificio, entrada, piso, s_id
-    )
+    ),
 
 asignacion_sin_cortar_piso as (
-    select prov, dpto, codloc, frac, radio, mza, lado, nrocatastr, sector, edificio, entrada, piso, p.sgm_listado, p.s_id, orden_reco
+    select id, prov, dpto, codloc, frac, radio, mza, lado, nrocatastr, sector, edificio, entrada, piso, p.sgm_listado, p.s_id, orden_reco
     from asignacion_segmentos_pisos_enteros p
     join asignacion_segmentos
     using (prov, dpto, codloc, frac, radio, mza, lado, nrocatastr, sector, edificio, entrada, piso)
@@ -140,7 +140,7 @@ set segmento_id = case
 from ("' || esquema || '".muestra
 join asignacion_sin_cortar_piso
 on s_id = pos_censal_id) j
-where sgm.segmento_id = pos_censal_id
+where sgm.listado_id = j.id
 ;';
 
 return 1;
