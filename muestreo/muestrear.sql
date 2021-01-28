@@ -93,6 +93,7 @@ with a_partir as (
   join "' || esquema || '".para_la_muestra
   on segmento_id = s_id
   where muestreado
+  and orden_reco != ''''
   ),
   carga_segmentos as (
   select prov, dpto, codloc, frac, radio, s_id, count(*) as cantidad
@@ -106,7 +107,7 @@ pisos_abiertos as (
     from a_partir
     window w as (
         partition by prov, dpto, codloc, frac, radio, s_id
-        order by mza, lado, orden_reco
+        order by mza, lado, orden_reco::integer
         )
     ),
 
