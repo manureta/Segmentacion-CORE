@@ -47,7 +47,7 @@ etiquetas as (
 etiquetas_muestra as (
   select segmento_id, 60 + rank() over w as seg 
   from minimos
-  join e0002.muestra
+  join "' || esquema || '".muestra
   on (segmento_id = pre_censal_id1 or segmento_id = pre_censal_id2)
   window w as (
     partition by prov, dpto, codloc, frac, radio
