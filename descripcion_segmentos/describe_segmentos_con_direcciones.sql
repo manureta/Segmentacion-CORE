@@ -53,8 +53,6 @@ segmento_lado_desde_hasta as (
     indec.descripcion_calle_desde_hasta(''' || esquema || ''', desde_id, hasta_id, completo)::text as descripcion,
     viviendas
   from "' || esquema || '".segmentos_desde_hasta_ids
-  order by prov::integer, dpto::integer, codloc::integer, frac::integer, radio::integer,
-    mza::integer, lado::integer
   ),
 segmento_lados as (
   select prov::integer, dpto::integer, codloc::integer, frac::integer, radio::integer,
@@ -64,6 +62,9 @@ segmento_lados as (
   from segmento_lado_desde_hasta
   group by prov::integer, dpto::integer, codloc::integer, frac::integer, radio::integer,
     mza::integer, segmento_id::bigint
+  order by prov::integer, dpto::integer, codloc::integer, frac::integer, radio::integer,
+    mza::integer, segmento_id::bigint
+
   )
 select prov::integer, dpto::integer, codloc::integer, frac::integer, radio::integer,
   segmento_id::bigint, seg::text, 
