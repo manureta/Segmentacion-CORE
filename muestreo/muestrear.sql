@@ -86,7 +86,9 @@ where muestreado
 execute '
 with a_partir as (
   select l.id, l.prov, l.dpto, l.codloc, l.frac, l.radio, l.mza, l.lado, l.nrocatastr,
-     l.sector, l.edificio, l.entrada, l.piso, l.orden_reco, s_id
+    l.sector, l.edificio, l.entrada, l.piso, 
+    coalesce(CASE WHEN l.orden_reco='''' THEN NULL ELSE l.orden_reco END,''0'')::integer as orden_reco, 
+    s_id
   from "' || esquema || '".listado l
   join "' || esquema || '".segmentacion
   on l.id = listado_id
@@ -102,18 +104,18 @@ with a_partir as (
   ),
 
 pisos_abiertos as (
-    select id, prov, dpto, codloc, frac, radio, mza, lado, nrocatastr, sector, edificio, entrada, piso, orden_reco::integer, s_id,
+    select id, prov, dpto, codloc, frac, radio, mza, lado, nrocatastr, sector, edificio, entrada, piso, orden_reco, s_id,
         row_number() over w as row, rank() over w as rank
     from a_partir
     window w as (
         partition by prov, dpto, codloc, frac, radio, s_id
-        order by mza, lado, orden_reco::integer
+        order by mza, lado, orden_reco
         )
     ),
 
 asignacion_segmentos as (
     select id, prov, dpto, codloc, frac, radio, mza, lado,
-        nrocatastr, sector, edificio, entrada, piso, orden_reco::integer, s_id,
+        nrocatastr, sector, edificio, entrada, piso, orden_reco, s_id,
         floor((rank - 1)*2/cantidad) + 1 as sgm_listado, rank
     from carga_segmentos
     join pisos_abiertos
