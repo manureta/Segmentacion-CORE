@@ -46,24 +46,24 @@ execute '
 create table "' || esquema || '".segmentos_desde_hasta as 
 with 
 listado as ( select id, prov, dpto, codloc, frac, radio, mza, lado,
-coalesce(CASE WHEN orden_reco='''' THEN NULL ELSE orden_reco END,''0'')::integer orden_reco,
-tipoviv
+  coalesce(CASE WHEN orden_reco='''' THEN NULL ELSE orden_reco END,''0'')::integer orden_reco,
+  tipoviv
 from "' || esquema || '".listado),
 segmentacion as ( select * from "' || esquema || '".segmentacion),
 
 lados_desde_hasta as (
 -- desde hasta por lado
-select prov, dpto, codloc, frac, radio, mza, lado,
-  min(listado.orden_reco::integer) as lado_desde, max(listado.orden_reco::integer) as lado_hasta
-from listado
-group by prov, dpto, codloc, frac, radio, mza, lado
-order by prov, dpto, codloc, frac, radio, mza, lado
+  select prov, dpto, codloc, frac, radio, mza, lado,
+    min(listado.orden_reco) as lado_desde, max(listado.orden_reco) as lado_hasta
+  from listado
+  group by prov, dpto, codloc, frac, radio, mza, lado
+  order by prov, dpto, codloc, frac, radio, mza, lado
 --;
 )
 -- desde hasta lado por segmento
 select prov, dpto, codloc, frac, radio, mza, lado, segmento_id,
-  min(listado.orden_reco::integer) as seg_lado_desde, max(listado.orden_reco::integer) as seg_lado_hasta,
-  (min(listado.orden_reco::integer) = lado_desde and max(listado.orden_reco::integer) = lado_hasta) as completo,
+  min(listado.orden_reco) as seg_lado_desde, max(listado.orden_reco) as seg_lado_hasta,
+  (min(listado.orden_reco) = lado_desde and max(listado.orden_reco) = lado_hasta) as completo,
   count(indec.contar_vivienda(tipoviv)) as viviendas
 from listado
 join segmentacion
@@ -83,10 +83,10 @@ execute 'drop table if exists "' || esquema || '".segmentos_desde_hasta_ids casc
 execute '
 create table "' || esquema || '".segmentos_desde_hasta_ids as
 with 
-listado as ( select id, prov, dpto, codloc, frac, radio, mza, lado,
-orden_reco
-from "' || esquema || '".listado
-WHERE trim(orden_reco)!='''')
+listado as ( 
+  select id, prov, dpto, codloc, frac, radio, mza, lado,
+    coalesce(CASE WHEN orden_reco='''' THEN NULL ELSE orden_reco END,''0'')::integer orden_reco
+  from "' || esquema || '".listado)
 select * from
 (
   select l.prov, l.dpto, l.codloc, l.frac, l.radio, l.mza, l.lado, s.segmento_id, l.id as desde_id,
@@ -94,7 +94,7 @@ select * from
   from "' || esquema || '".segmentos_desde_hasta s
   join listado l on s.prov = l.prov and s.dpto = l.dpto and s.codloc = l.codloc
   and s.frac = l.frac and s.radio = l.radio and s.mza = l.mza and s.lado = l.lado
-  and seg_lado_desde = orden_reco::integer
+  and seg_lado_desde = orden_reco
 ) as desdes
 natural join (
   select l.prov, l.dpto, l.codloc, l.frac, l.radio, l.mza, l.lado, s.segmento_id, l.id as hasta_id,
@@ -102,7 +102,7 @@ natural join (
   from "' || esquema || '".segmentos_desde_hasta s
   join listado l on s.prov = l.prov and s.dpto = l.dpto and s.codloc = l.codloc
   and s.frac = l.frac and s.radio = l.radio and s.mza = l.mza and s.lado = l.lado
-  and seg_lado_hasta = orden_reco::integer
+  and seg_lado_hasta = orden_reco
 ) as hastas
 order by prov, dpto, codloc, frac, radio, mza, lado
 ;
