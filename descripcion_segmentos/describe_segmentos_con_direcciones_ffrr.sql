@@ -101,6 +101,7 @@ segmentos_descripcion_lado as (
     indec.descripcion_calle_desde_hasta(''' || esquema || ''', desde_id, hasta_id, completo)::text as descripcion,
     viviendas
   from segmentos_lados_desde_hasta_ids
+  order by mza::integer, lado::integer
   ),
 segmentos_descripcion_mza as (
   select prov::integer, dpto::integer, codloc::integer, frac::integer, radio::integer,
@@ -111,7 +112,7 @@ segmentos_descripcion_mza as (
   group by prov::integer, dpto::integer, codloc::integer, frac::integer, radio::integer,
     mza::integer, segmento_id::bigint
   order by prov::integer, dpto::integer, codloc::integer, frac::integer, radio::integer,
-    mza::integer, segmento_id::bigint
+    mza::integer
   )
 
 select prov::integer, dpto::integer, codloc::integer, frac::integer, radio::integer,
@@ -122,8 +123,8 @@ from segmentos_descripcion_mza
 join etiquetas 
 using (segmento_id)
 group by prov::integer, dpto::integer, codloc::integer, frac::integer, radio::integer,
-  segmento_id::bigint, seg::text
-order by seg::text
+  segmento_id::bigint, seg::integer, seg::text
+order by seg::integer
 
 ;';
 end;
