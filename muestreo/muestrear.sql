@@ -28,7 +28,7 @@ language sql stable
 ;';
 
 
---execute 'drop table if exists "' || esquema || '".segmentacion_pre_muestra;';
+execute 'drop table if exists "' || esquema || '".segmentacion_pre_muestra;';
 execute 'create table "' || esquema || '".segmentacion_pre_muestra as 
 select * from "' || esquema || '".segmentacion;';
 --- esto es para guardar la segmentación hecha 
