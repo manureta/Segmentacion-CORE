@@ -36,7 +36,7 @@ with
       substr(mzai,13,3)::integer as mza, ladoi::integer as lado,
       codigo20::integer as ccalle, nombre::text as ncalle
     from e00
-    where mzai is not Null and mzai != '''' and ladoi is not Null
+    where mzai is not Null and mzai != '''' and trim(mzai) != ''0'' and ladoi is not Null
     union
     select substr(mzad,1,2)::integer as prov, substr(mzad,3,3)::integer as dpto, 
       substr(mzad,6,3)::integer as codloc,
@@ -44,7 +44,7 @@ with
       substr(mzad,13,3)::integer as mza, ladod::integer as lado,
       codigo20::integer as ccalle, nombre::text as ncalle
     from e00
-    where mzad is not Null and mzad != '''' and ladod is not Null
+    where mzad is not Null and mzad != '''' and trim(mzad) != ''0'' and ladod is not Null
   ),
   de_ambos as (
   select prov, dpto, codloc, frac, radio, mza, lado,
