@@ -48,13 +48,13 @@ with listado_sin_vacios as (
     select codigo20, mzai||''-''||ladoi as lado_id, mzai as mza, ladoi as lado, avg(anchomed) as anchomed,
         st_linemerge(st_union(st_reverse(wkb_geometry))) as geom, cover
     from e00
-    where mzai is not null and mzai != ''''
+    where mzai is not null and mzai != '''' and trim(mzai)!=''0''
     group by codigo20, mzai, ladoi, cover
     union
     select codigo20, mzad||''-''||ladod as lado_id, mzad as mza, ladod as lado, avg(anchomed) as anchomed,
         st_linemerge(st_union(wkb_geometry)) as geom, cover
     from e00
-    where mzad is not null and mzad != ''''
+    where mzad is not null and mzad != '''' and trim(mzad)!=''0'
     group by codigo20, mzad, ladod, cover
     ),
     lados_codigos as (
