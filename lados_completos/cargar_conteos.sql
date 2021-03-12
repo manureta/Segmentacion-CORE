@@ -54,7 +54,7 @@ with listado_sin_vacios as (
     select codigo20, mzad||''-''||ladod as lado_id, mzad as mza, ladod as lado, avg(anchomed) as anchomed,
         st_linemerge(st_union(wkb_geometry)) as geom, cover
     from e00
-    where mzad is not null and mzad != '''' and trim(mzad)!=''0'
+    where mzad is not null and mzad != '''' and trim(mzad)!=''0''
     group by codigo20, mzad, ladod, cover
     ),
     lados_codigos as (
