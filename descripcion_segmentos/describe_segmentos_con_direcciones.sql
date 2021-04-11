@@ -10,8 +10,8 @@ fecha: 2021-01-29
 
 */
 
-DROP FUNCTION if exists indec.describe_segmentos_con_direcciones_ff(text);
-create or replace function indec.describe_segmentos_con_direcciones_ff(esquema text)
+DROP FUNCTION if exists indec.describe_segmentos_con_direcciones(text);
+create or replace function indec.describe_segmentos_con_direcciones(esquema text)
  returns table (
  prov integer, dpto integer, codloc integer, frac integer, radio integer,
  segmento_id bigint, seg text, descripcion text, viviendas numeric

@@ -11,7 +11,7 @@ fecha: 2021-01-29
 
 */
 
-DROP FUNCTION if exists indec.describe_segmentos_con_direccionesi_ffrr(text, integer, integer);
+DROP FUNCTION if exists indec.describe_segmentos_con_direcciones_ffrr(text, integer, integer);
 create or replace function indec.describe_segmentos_con_direcciones_ffrr(esquema text, _frac integer, _radio integer)
  returns table (
  prov integer, dpto integer, codloc integer, frac integer, radio integer,
