@@ -52,7 +52,7 @@ with lados_del_segmento as (
 update "' || esquema || '".segmentacion
 set segmento_id = seg_j
 from segmentos_contiguos_de_vacios_vivs
-where segmento_id = seg_i
+where segmento_id = seg_i and rnk = 1
 ';
 
 return 1;
