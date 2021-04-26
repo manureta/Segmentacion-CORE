@@ -4,8 +4,8 @@ descripción:
 crea la descripcion de un dado segmento, usando mzas, lados, y desde hasta por lados
 para agregarse en el mapa del radio
 SÓLO para un SOLO radio
-SÓLO sirve si no hay muestreo LACALIDAD de menos de 50 mil
 no usa tabla intermedia esquema.segmendo_lado_desde_hasta_ids
+decide si hay que usar muestreo o no
 autor: -h
 fecha: 2021-01-29
 
