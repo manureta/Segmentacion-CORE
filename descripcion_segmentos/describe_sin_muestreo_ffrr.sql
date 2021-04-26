@@ -1,5 +1,5 @@
 /*
-titulo: describe_segmentos_con_direccionesi_ffrr.sql
+titulo: describe_sin_muestreo_ffrr.sql
 descripción:
 crea la descripcion de un dado segmento, usando mzas, lados, y desde hasta por lados
 para agregarse en el mapa del radio
