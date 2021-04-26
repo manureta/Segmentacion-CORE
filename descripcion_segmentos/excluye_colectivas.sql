@@ -37,7 +37,7 @@ from casos
 
 if a_excluir != '' then 
   return query 
-  select '. Se excluyen las vivienda(s) colectiva(s): ' || a_excluir;
+  select '. Se excluyen la(s) vivienda(s) colectiva(s): ' || a_excluir;
 else
   return query 
   select '';  
