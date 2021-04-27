@@ -16,7 +16,9 @@ create or replace function indec.excluye_colectivas_ffrrmmmllss(esquema text, _f
 set client_min_messages = error
 as $function$
 
-declare a_excluir text;
+declare 
+a_excluir text;
+cuantos integer;
 
 begin
  
@@ -31,13 +33,15 @@ with
   segmentacion as (select * from "' || esquema || '".segmentacion where segmento_id = ' || _seg_id || '),
   casos as (select * from listado join segmentacion on listado.id = listado_id)
 
-select string_agg(indec.descripcion_domicilio(''' || esquema || ''', id), '', '')::text as descripcion
+select string_agg(indec.descripcion_domicilio(''' || esquema || ''', id), '', '')::text as descripcion, count(*) 
 from casos
-;' into a_excluir;
+;' into a_excluir, cuantos;
 
-if a_excluir != '' then 
+if cuantos > 1 then 
   return query 
-  select '. Se excluyen la(s) vivienda(s) colectiva(s): ' || a_excluir;
+  select '. Se excluyen las viviendas colectivas sitas en: ' || a_excluir;
+elseif cuantos = 1 then
+  select '. Se excluye la vivienda colectiva sita en: ' || a_excluir;
 else
   return query 
   select '';  
