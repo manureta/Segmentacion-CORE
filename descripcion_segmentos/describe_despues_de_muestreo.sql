@@ -40,7 +40,6 @@ segmentos_row_number as (
   join "' || esquema || '".segmentacion 
   on listado_id = listado.id
   group by prov, dpto, codloc, frac, radio, segmento_id, mza, lado, orden_reco, sector, edificio, entrada, piso
-  order by prov, dpto, codloc, frac, radio, segmento_id, mza, lado, orden_reco
   ),
 segmentos_inicios as (
   select * from segmentos_row_number where rnk = 1
@@ -132,7 +131,8 @@ segmentos_descripcion_mza as (
 select * from (
 select prov::integer, dpto::integer, codloc::integer, frac::integer, radio::integer,
   segmento_id::bigint, lpad(seg::text, 2, ''0'') as seg,
-  string_agg(''Manzana '' || lpad(mza::integer::text, 3, ''0'') || '': '' || descripcion, ''. '') as descripcion,
+  string_agg(''Manzana '' || lpad(mza::integer::text, 3, ''0'') || '': '' || descripcion, ''. '') 
+  || indec.excluye_colectivas(''' || esquema || ''', segmento_id) as descripcion,
   sum(viviendas) as viviendas
 from segmentos_descripcion_mza
 join etiquetas 
@@ -142,7 +142,8 @@ group by prov::integer, dpto::integer, codloc::integer, frac::integer, radio::in
 union
 select prov::integer, dpto::integer, codloc::integer, frac::integer, radio::integer,
   segmento_id::bigint, lpad(seg::text, 2, ''0'') as seg,
-  string_agg(''Manzana '' || lpad(mza::integer::text, 3, ''0'') || '': '' || descripcion, ''. '') as descripcion,
+  string_agg(''Manzana '' || lpad(mza::integer::text, 3, ''0'') || '': '' || descripcion, ''. '')
+  || indec.excluye_colectivas(''' || esquema || ''', segmento_id) as descripcion,
   sum(viviendas) as viviendas
 from segmentos_descripcion_mza
 join etiquetas_muestra
@@ -150,7 +151,6 @@ using (segmento_id)
 group by prov::integer, dpto::integer, codloc::integer, frac::integer, radio::integer,
   segmento_id::bigint, seg::text
 ) as r3
-order by prov::integer, dpto::integer, codloc::integer, frac::integer, radio::integer, seg::text
 
 ';
 end;
