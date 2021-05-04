@@ -39,9 +39,9 @@ from casos
 
 if cuantos > 1 then 
   return query 
-  select '. Se excluyen las viviendas colectivas sitas en: ' || a_excluir;
+  select '.  Se excluyen las viviendas colectivas sitas en: ' || a_excluir;
 elseif cuantos = 1 then
-  select '. Se excluye la vivienda colectiva sita en: ' || a_excluir;
+  select '.  Se excluye la vivienda colectiva sita en: ' || a_excluir;
 else
   return query 
   select '';  
