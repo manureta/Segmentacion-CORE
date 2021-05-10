@@ -7,8 +7,8 @@ fecha: 2021-04-26
 
 */
 
-DROP FUNCTION if exists indec.excluye_colectivas(text, _seg_id integer);
-create or replace function indec.excluye_colectivas(esquema text, _seg_id integer)
+DROP FUNCTION if exists indec.excluye_colectivas(text, _seg_id bigint);
+create or replace function indec.excluye_colectivas(esquema text, _seg_id bigint)
  returns text
  language plpgsql volatile
 set client_min_messages = error
