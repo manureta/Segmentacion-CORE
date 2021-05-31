@@ -22,7 +22,7 @@ from "' || esquema || '".listado
 join "' || esquema || '".segmentacion
 on listado_id = listado.id
 group by segmento_id
-having count(*) > ' || umbral || '
+having count(indec.contar_vivienda(tipoviv)) > ' || umbral || '
 ;';
 end;
 $function$
@@ -45,7 +45,7 @@ join "' || esquema || '".segmentacion
 on listado_id = listado.id
 where frac::integer = ' || ff || ' and radio::integer = ' || rr || '
 group by segmento_id
-having count(*) > ' || umbral || '
+having count(indec.contar_vivienda(tipoviv)) > ' || umbral || '
 ;';
 end;
 $function$
