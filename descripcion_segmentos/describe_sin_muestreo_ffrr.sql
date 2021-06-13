@@ -101,8 +101,12 @@ segmentos_descripcion_lado as (
     indec.descripcion_calle_desde_hasta(''' || esquema || ''', desde_id, hasta_id, completo)::text as descripcion,
     viviendas
   from segmentos_lados_desde_hasta_ids
-  order by mza::integer, lado::integer
+  order by lado::integer
   ),
+--------------
+-- ordenar los lados como está hecho en descripcion_segmentos.sql
+
+--------------
 segmentos_descripcion_mza as (
   select prov::integer, dpto::integer, codloc::integer, frac::integer, radio::integer,
     mza::integer, segmento_id::bigint,
