@@ -92,6 +92,41 @@ segmentos_lados_desde_hasta_ids as (
     and seg_lado_hasta = orden_reco
     ) as hastas
   ),
+--------------
+-- ordenar los lados como está hecho en descripcion_segmentos.sql
+lados_por_mza as (select prov, dpto, codloc, frac, radio, mza, count(*) as cant_lados
+  from segmentos_lados_desde_hasta_ids
+  group by prov, dpto, codloc, frac, radio, mza
+  ),
+lados_de_mzas_i as (select prov, dpto, codloc, segmento_id, mza, lado, lado::integer as i
+  from segmentos_lados_desde_hasta_ids
+  ),
+serie as (select segmento_id, mza, generate_series(1, cant_lados) as i
+  from lados_de_mzas_i
+  natural join lados_por_mza
+  group by prov, dpto, codloc, segmento_id, mza, cant_lados
+  ),
+junta as (select * from lados_de_mzas_i natural full join serie),
+no_estan as (select segmento_id, mza,
+    max(i) as max_no_esta, min(i) as min_no_esta
+  from junta
+  where lado is Null
+  group by segmento_id, mza, lado
+  ),
+lados_ordenados as (
+  select segmento_id, mza, lado,
+  case
+  when lado::integer > max_no_esta then lado::integer - max_no_esta -- el hueco está abajo
+  when min_no_esta > lado::integer then cant_lados - max_no_esta + lado::integer -- el hueco está arriba
+  when min_no_esta = 1 and max_no_esta = cant_lados then lado::integer -- hay hueco a ambos lados, no empieza en 1
+  end
+  as orden
+  from no_estan
+  natural join
+  lados_de_mzas_i
+  natural join
+  lados_por_mza),
+--------------
 
 segmentos_descripcion_lado as (
   select prov, dpto, codloc, frac, radio, mza, lado, segmento_id,
@@ -101,22 +136,16 @@ segmentos_descripcion_lado as (
     indec.descripcion_calle_desde_hasta(''' || esquema || ''', desde_id, hasta_id, completo)::text as descripcion,
     viviendas
   from segmentos_lados_desde_hasta_ids
-  order by lado::integer
   ),
---------------
--- ordenar los lados como está hecho en descripcion_segmentos.sql
-
---------------
 segmentos_descripcion_mza as (
   select prov::integer, dpto::integer, codloc::integer, frac::integer, radio::integer,
     mza::integer, segmento_id::bigint,
-    string_agg(descripcion, '', '') as descripcion,
+    string_agg(descripcion, '', '' order by orden) as descripcion,
     sum(viviendas) as viviendas
   from segmentos_descripcion_lado
+  natural join lados_ordenados
   group by prov::integer, dpto::integer, codloc::integer, frac::integer, radio::integer,
     mza::integer, segmento_id::bigint
-  order by prov::integer, dpto::integer, codloc::integer, frac::integer, radio::integer,
-    mza::integer
   )
 
 select prov::integer, dpto::integer, codloc::integer, frac::integer, radio::integer,
@@ -127,7 +156,7 @@ select prov::integer, dpto::integer, codloc::integer, frac::integer, radio::inte
          then '' completa''
          else ''''
     end
-  || '': '' || descripcion, ''. '')
+  || '': '' || descripcion, ''. '' order by mza)
   || indec.excluye_colectivas(''' || esquema || ''', segmento_id) as descripcion,
   sum(viviendas) as viviendas
 from segmentos_descripcion_mza
