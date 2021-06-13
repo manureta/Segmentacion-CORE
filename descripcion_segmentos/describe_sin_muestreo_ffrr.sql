@@ -117,7 +117,13 @@ segmentos_descripcion_mza as (
 
 select prov::integer, dpto::integer, codloc::integer, frac::integer, radio::integer,
   segmento_id::bigint, lpad(seg::text, 2, ''0'') as seg,
-  string_agg(''Manzana '' || lpad(mza::integer::text, 3, ''0'') || '': '' || descripcion, ''. '')
+  string_agg(''Manzana ''
+  || lpad(mza::integer::text, 3, ''0'') || 
+    case when indec.manzana_completa_ffrr(''' || esquema || '''::text, frac::integer, radio::integer, mza::integer)
+         then '' completa''
+         else ''''
+    end
+  || '': '' || descripcion, ''. '')
   || indec.excluye_colectivas(''' || esquema || ''', segmento_id) as descripcion,
   sum(viviendas) as viviendas
 from segmentos_descripcion_mza
