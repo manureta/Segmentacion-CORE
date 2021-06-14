@@ -22,6 +22,76 @@ usar columnas
  descripci2 | character varying(1)   |           |          |
 */
 
+create or replace function indec.descripcion_colectiva(in esquema text, listado_id integer)
+ returns text
+ language plpgsql volatile
+set client_min_messages = error
+as $function$
+declare 
+domicilio text;
+subtipo text := 'vivienda colectiva';
+hay_subtipo boolean;
+
+begin
+
+execute
+'SELECT EXISTS (SELECT 1
+  FROM information_schema.columns
+  WHERE table_schema=''' || esquema || ''' AND table_name=''listado'' AND column_name= ''cod_subt_v'')
+' into hay_subtipo;
+
+IF (hay_subtipo) THEN
+  execute '
+  select case when cod_subt_v != ''CO10''
+    then nombre
+    else ''vivienda colectiva''
+  end
+  from "' || esquema || '".listado
+  join public.subtipo_vivienda st
+  on cod_subt_v = st.codigo
+  where ' || listado_id || ' = id
+  ' into subtipo;
+END IF;
+
+execute '
+select
+  ''' || subtipo || '''  || '' en '' || 
+  ccalle || '' - '' || ncalle ||
+    case
+    when nrocatastr is Null or trim(nrocatastr) = '''' or
+         trim(nrocatastr) = ''0'' or trim(nrocatastr) = ''S/N''
+            then '' S/N ''
+    else '' Nº '' || nrocatastr || '' ''
+  end ||
+  case
+    when edificio is Null or edificio = '''' then ''''
+    else '' edificio '' || edificio
+  end ||
+  case
+    when entrada is Null or entrada = '''' then ''''
+    else '' entrada '' || entrada
+  end ||
+  case
+    when sector is Null or sector = '''' then ''''
+    else '' sector '' || sector
+  end ||
+  case
+    when piso is Null or piso = '''' then ''''
+    else '' piso '' || piso
+  end ||
+  case
+    when descripcio is Null or descripcio = '''' then ''''
+    else '' descripción '' || descripcio
+  end
+from "' || esquema || '".listado
+where ' || listado_id || ' = id
+;' into domicilio;
+
+return domicilio;
+end;
+$function$
+;
+
 create or replace function indec.descripcion_domicilio(in esquema text, listado_id integer)
  returns text
  language plpgsql volatile
