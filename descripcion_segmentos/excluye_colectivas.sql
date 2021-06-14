@@ -29,14 +29,14 @@ with
   segmentacion as (select * from "' || esquema || '".segmentacion where segmento_id = ' || _seg_id || '),
   casos as (select * from listado join segmentacion on listado.id = listado_id)
 
-select string_agg(indec.descripcion_domicilio(''' || esquema || ''', id), '', '')::text as descripcion, count(*) 
+select string_agg(indec.descripcion_colectiva(''' || esquema || ''', id), '', '')::text as descripcion, count(*) 
 from casos
 ;' into a_excluir, cuantos;
 
 if cuantos > 1 then 
-  a_excluir = '.  Se excluyen las viviendas colectivas sitas en: ' || a_excluir;
+  a_excluir = '.  Se excluyen las viviendas sitas en: ' || a_excluir;
 elseif cuantos = 1 then
-  a_excluir = '.  Se excluye la vivienda colectiva sita en: ' || a_excluir;
+  a_excluir = '.  Se excluye la vivienda sita en: ' || a_excluir;
 else
   a_excluir = '';
 end if;
