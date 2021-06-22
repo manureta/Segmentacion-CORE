@@ -34,9 +34,9 @@ from casos
 ;' into a_excluir, cuantos;
 
 if cuantos > 1 then 
-  a_excluir = '.  Se excluyen las viviendas sitas en: ' || a_excluir;
+  a_excluir = '.  Se excluyen las viviendas: ' || a_excluir;
 elseif cuantos = 1 then
-  a_excluir = '.  Se excluye la vivienda sita en: ' || a_excluir;
+  a_excluir = '.  Se excluye la vivienda: ' || a_excluir;
 else
   a_excluir = '';
 end if;
