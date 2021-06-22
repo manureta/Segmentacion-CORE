@@ -150,14 +150,14 @@ segmentos_descripcion_mza as (
 
 select prov::integer, dpto::integer, codloc::integer, frac::integer, radio::integer,
   segmento_id::bigint, lpad(seg::text, 2, ''0'') as seg,
-  string_agg(''Manzana ''
-  || lpad(mza::integer::text, 3, ''0'') || 
+  concat(string_agg(concat(''Manzana '',
+   lpad(mza::integer::text, 3, ''0''),
     case when indec.manzana_completa_ffrr(''' || esquema || '''::text, frac::integer, radio::integer, mza::integer)
          then '' completa''
          else ''''
-    end
-  || '': '' || descripcion, ''. '' order by mza)
-  || indec.excluye_colectivas(''' || esquema || ''', segmento_id) as descripcion,
+    end,
+   '': '', descripcion), ''. '' order by mza),
+  indec.excluye_colectivas(''' || esquema || ''', segmento_id)) as descripcion,
   sum(viviendas) as viviendas
 from segmentos_descripcion_mza
 join etiquetas 
