@@ -49,7 +49,7 @@ IF (hay_subtipo) THEN
   from "' || esquema || '".listado
   join public.subtipo_vivienda st
   on cod_subt_v = st.codigo
-  where ' || listado_id || ' = id
+  where ' || listado_id || ' = listado.id
   ' into subtipo;
 END IF;
 
