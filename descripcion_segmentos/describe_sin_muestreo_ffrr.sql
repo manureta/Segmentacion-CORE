@@ -131,9 +131,9 @@ lados_ordenados as (
 segmentos_descripcion_lado as (
   select prov, dpto, codloc, frac, radio, mza, lado, segmento_id,
     desde_id, hasta_id, completo,
-    ''Lado '' || lpad(lado::integer::text, 2, ''0'') ||
-      case when completo then '' completo '' else '' '' end ||
-    indec.descripcion_calle_desde_hasta(''' || esquema || ''', desde_id, hasta_id, completo)::text as descripcion,
+    concat(''Lado '', lpad(lado::integer::text, 2, ''0''),
+      case when completo then '' completo '' else '' '' end,
+    indec.descripcion_calle_desde_hasta(''' || esquema || ''', desde_id, hasta_id, completo)::text) as descripcion,
     viviendas
   from segmentos_lados_desde_hasta_ids
   ),
