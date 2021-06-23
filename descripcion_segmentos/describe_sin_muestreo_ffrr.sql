@@ -140,7 +140,7 @@ lados_ordenados as (
 --------------
 
 segmentos_descripcion_lado as (
-  select prov, dpto, codloc, frac, radio, mza::integer, lado::integer, segmento_id,
+  select prov, dpto, codloc, frac, radio, mza::integer, lado::integer, segmento_id::bigint,
     desde_id, hasta_id, completo,
     concat(''Lado '', lpad(lado::integer::text, 2, ''0''),
       case when completo then '' completo '' else '' '' end,
