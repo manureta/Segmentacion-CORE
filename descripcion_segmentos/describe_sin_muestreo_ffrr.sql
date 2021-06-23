@@ -98,11 +98,11 @@ lados_por_mza as (select prov, dpto, codloc, frac, radio, mza, count(*) as cant_
   from segmentos_lados_desde_hasta_ids
   group by prov, dpto, codloc, frac, radio, mza
   ),
-lados_de_mzas_i as (select prov, dpto, codloc, segmento_id, mza, lado, lado::integer as i
+lados_de_mzas_inc as (select prov, dpto, codloc, segmento_id, mza, lado, lado::integer as i
   from segmentos_lados_desde_hasta_ids
   ),
 serie as (select segmento_id, mza, generate_series(1, cant_lados) as i
-  from lados_de_mzas_i
+  from lados_de_mzas_inc
   natural join lados_por_mza
   group by prov, dpto, codloc, segmento_id, mza, cant_lados
   ),
@@ -113,7 +113,7 @@ no_estan as (select segmento_id, mza,
   where lado is Null
   group by segmento_id, mza, lado
   ),
-lados_ordenados as (
+lados_ordenados_inc as (
   select segmento_id, mza, lado,
   case
   when lado::integer > max_no_esta then lado::integer - max_no_esta -- el hueco está abajo
@@ -123,9 +123,20 @@ lados_ordenados as (
   as orden
   from no_estan
   natural join
-  lados_de_mzas_i
+  lados_de_mzas_inc
   natural join
   lados_por_mza),
+lados_ordenados_comp as (
+  select segmento_id, mza, lado, lado as orden
+  from segmentos_lados_desde_hasta_ids
+  where indec.manzana_completa_ffrr(''' || esquema || '''::text, frac::integer, radio::integer, mza::integer)
+  group by segmento_id, mza, lado
+  ),
+lados_ordenados as (
+ select * from lados_ordenados_inc
+ union
+ select * from lados_ordenados_comp
+ ),
 --------------
 
 segmentos_descripcion_lado as (
