@@ -101,7 +101,7 @@ lados_por_mza as (select prov, dpto, codloc, frac, radio, mza, count(*) as cant_
 lados_de_mzas_inc as (select prov, dpto, codloc, segmento_id, mza, lado, lado::integer as i
   from segmentos_lados_desde_hasta_ids
   ),
-serie as (select segmento_id, mza, generate_series(1, cant_lados) as i
+serie as (select segmento_id, mza, generate_series(1, cant_lados)::integer as i
   from lados_de_mzas_inc
   natural join lados_por_mza
   group by prov, dpto, codloc, segmento_id, mza, cant_lados
