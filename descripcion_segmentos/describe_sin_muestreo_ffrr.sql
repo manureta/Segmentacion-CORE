@@ -133,9 +133,9 @@ lados_ordenados_comp as (
   group by segmento_id, mza, lado
   ),
 lados_ordenados as (
- select * from lados_ordenados_inc
+ select segmento_id::bigint, mza::integer, lado::integer, orden::integer from lados_ordenados_inc
  union
- select * from lados_ordenados_comp
+ select segmento_id::bigint, mza::integer, lado::integer, orden::integer from lados_ordenados_comp
  ),
 --------------
 
