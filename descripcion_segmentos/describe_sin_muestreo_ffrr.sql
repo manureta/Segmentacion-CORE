@@ -106,7 +106,7 @@ serie as (select segmento_id, mza, generate_series(1, cant_lados) as i
   natural join lados_por_mza
   group by prov, dpto, codloc, segmento_id, mza, cant_lados
   ),
-junta as (select * from lados_de_mzas_i natural full join serie),
+junta as (select * from lados_de_mzas_inc natural full join serie),
 no_estan as (select segmento_id, mza,
     max(i) as max_no_esta, min(i) as min_no_esta
   from junta
