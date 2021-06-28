@@ -42,6 +42,13 @@ execute
 
 IF (hay_subtipo) THEN
   execute '
+  select not (cod_subt_v = '''' or cod_subt_v is Null)
+    from "' || esquema || '".listado where id = ' || listado_id || '
+' into hay_subtipo;
+END IF;
+
+IF (hay_subtipo) THEN
+  execute '
   select case when cod_subt_v != ''CO10''
     then nombre
     else ''vivienda colectiva''
